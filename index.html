@@ -1614,8 +1614,19 @@
                   يدعم ملف (مرتبات من 1 الى 9.xlsx) وملف (بيانات المرتبات الشهرية) وكافة الكشوفات. يربط الخانات بدقة تامة دون تداخل ويفرز المرتب لكل شهر وسنة على حدة.
                 </p>
                 <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="display:none;" onchange="handleExcelUpload(event)">
-                <button class="btn btn-success" style="padding:12px 24px; font-size:1rem;" onclick="document.getElementById('excelFileInput').click()">
-                  <i class="fa-solid fa-upload"></i> رفع واستيراد الملف الآن
+                <button class="btn btn-success" style="padding:12px 24px; font-size:1rem;" onclick="openExcelImportModal()">
+                  <i class="fa-solid fa-upload"></i> استيراد ملف المرتبات
+                </button>
+              </div>
+
+              <div style="border:1px solid #fecaca; border-radius:14px; padding:26px; text-align:center; background:#fff7f7;">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size:3rem; color:var(--danger); margin-bottom:12px;"></i>
+                <h3 style="color:#991b1b;">تصفير المنظومة بالكامل</h3>
+                <p style="color:var(--text-muted); font-size:0.88rem; margin:8px 0 16px;">
+                  حذف جميع بيانات الموظفين والسجلات المالية الشهرية والإعدادات المحفوظة محلياً، مع إبقاء كود المنظومة نفسه. هذا الإجراء لا يمكن التراجع عنه.
+                </p>
+                <button class="btn btn-danger" style="padding:12px 24px; font-size:1rem;" onclick="secureSystemReset()">
+                  <i class="fa-solid fa-trash-can"></i> تصفير المنظومة بالكامل
                 </button>
               </div>
 
@@ -2193,6 +2204,25 @@
     </div>
   </div>
 
+  <!-- نافذة اختيار فترة استيراد المرتبات -->
+  <div id="excel-import-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:560px; margin-top:7vh;">
+      <div class="panel-header" style="margin-bottom:16px;">
+        <div class="panel-title"><i class="fa-solid fa-calendar-days"></i> تحديد فترة ملف المرتبات</div>
+        <button type="button" class="btn btn-secondary" style="padding:6px 10px;" onclick="closeExcelImportModal()" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:16px; font-size:0.88rem; line-height:1.8;">
+        <strong style="color:#1e3a8a;"><i class="fa-solid fa-shield-halved"></i> حماية البيانات:</strong> اختر الشهر والسنة أولاً. عند إعادة رفع نفس الفترة سيتم تحذيرك قبل استبدال بياناتها، ولن يتم إنشاء موظف مكرر بالرقم المالي أو الوطني.
+      </div>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:14px;">
+        <div class="form-group"><label class="form-label">السنة *</label><div class="input-wrapper"><select id="excelImportYear" required><option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option><option value="2028">2028</option></select><i class="fa-solid fa-calendar-check input-icon-right"></i></div></div>
+        <div class="form-group"><label class="form-label">الشهر *</label><div class="input-wrapper"><select id="excelImportMonth" required><option value="1">يناير (1)</option><option value="2">فبراير (2)</option><option value="3">مارس (3)</option><option value="4">أبريل (4)</option><option value="5">مايو (5)</option><option value="6">يونيو (6)</option><option value="7">يوليو (7)</option><option value="8">أغسطس (8)</option><option value="9" selected>سبتمبر (9)</option><option value="10">أكتوبر (10)</option><option value="11">نوفمبر (11)</option><option value="12">ديسمبر (12)</option></select><i class="fa-solid fa-calendar-days input-icon-right"></i></div></div>
+      </div>
+      <div id="excelImportPeriodStatus" style="margin-top:4px; padding:10px 12px; border-radius:8px; background:#f8fafc; border:1px solid var(--border-color); font-size:0.84rem; font-weight:700; color:var(--text-muted);">سيتم استيراد الملف إلى فترة: سبتمبر 2026</div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;"><button type="button" class="btn btn-secondary" onclick="closeExcelImportModal()">إلغاء</button><button type="button" class="btn btn-success" onclick="startExcelImport()"><i class="fa-solid fa-file-arrow-up"></i> اختيار ملف Excel واستيراده</button></div>
+    </div>
+  </div>
+
   <!-- نافذة إضافة موظف -->
   <div id="add-emp-modal" class="modal-overlay">
     <div class="modal-box">
@@ -2673,6 +2703,60 @@
       }
     }
 
+    /* تصفير كامل وآمن للبيانات المحلية — محمي بكلمة مرور وتأكيديْن.
+       لا يحذف ملف HTML أو الكود؛ يحذف فقط البيانات المخزنة في IndexedDB/localStorage. */
+    async function secureSystemReset() {
+      const RESET_PASSWORD = '33733';
+      const entered = prompt('لتصفير المنظومة بالكامل، أدخل كلمة السر:');
+      if (entered === null) return;
+      if (entered !== RESET_PASSWORD) {
+        alert('كلمة السر غير صحيحة. لم يتم حذف أي بيانات.');
+        return;
+      }
+
+      const finalConfirm = confirm(
+        'تحذير نهائي!\n\n' +
+        'سيتم حذف جميع الموظفين والسجلات المالية لجميع الأشهر والسنوات، ' +
+        'وكل الإعدادات المحفوظة محلياً مثل الشعار والتوقيعات والإعدادات المخصصة.\n\n' +
+        'لا يمكن التراجع عن هذا الإجراء.\n\nهل تريد المتابعة؟'
+      );
+      if (!finalConfirm) return;
+
+      try {
+        /* حذف قاعدة IndexedDB بالكامل لضمان عدم بقاء أي سجل موظف أو شهر. */
+        if (financeDB) {
+          try { financeDB.close(); } catch (e) {}
+          financeDB = null;
+        }
+        await new Promise((resolve, reject) => {
+          const req = indexedDB.deleteDatabase(FINANCE_DB_NAME);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error || new Error('تعذر حذف قاعدة البيانات المحلية'));
+          req.onblocked = () => reject(new Error('قاعدة البيانات المحلية ما زالت مستخدمة من نافذة أخرى. أغلق النوافذ الأخرى ثم أعد المحاولة.'));
+        });
+
+        /* حذف مفاتيح المنظومة الحالية فقط، مع ترك أي بيانات لا تخص المنظومة كما هي. */
+        [
+          STORAGE_EMP_KEY,
+          STORAGE_LOGO_KEY,
+          STORAGE_SIG_KEY,
+          STORAGE_USERS_KEY,
+          STORAGE_FONT_KEY,
+          STORAGE_LPTRIO_KEY
+        ].forEach(key => {
+          try { localStorage.removeItem(key); } catch (e) { console.warn('تعذر حذف المفتاح:', key, e); }
+        });
+
+        /* إعادة الحالة في الذاكرة إلى القيم الافتراضية ثم إعادة تحميل الصفحة
+           لضمان تنظيف جميع العناصر والرسوم والاختيارات دون ترك حالة قديمة. */
+        alert('تم تصفير المنظومة بالكامل بنجاح. سيتم إعادة تحميلها بحالتها الافتراضية.');
+        window.location.reload();
+      } catch (err) {
+        console.error('فشل تصفير المنظومة:', err);
+        alert('تعذر إكمال عملية التصفير بالكامل، لذلك لم يتم إجراء إعادة تحميل تلقائية.\n\nالسبب: ' + (err?.message || err));
+      }
+    }
+
     function toggleSidebar() {
       const sb = document.getElementById('sidebar');
       const mc = document.querySelector('.main-content');
@@ -2805,43 +2889,10 @@
 
     function getEmployeeSalaryForPeriod(emp, monthStr, yearStr) {
       if (!emp) return null;
-      const mNum = MONTH_MAP[monthStr] || Number(monthStr) || 9;
-      const yNum = Number(yearStr) || 2026;
-
-      const keysToTry = [`${yNum}-${mNum}`, `${mNum}`, monthStr, `${mNum}-${yNum}`];
-
-      if (emp.monthlyData) {
-        for (const k of keysToTry) {
-          if (emp.monthlyData[k]) {
-            const rec = normalizeSalaryRecord(emp.monthlyData[k], emp);
-            rec.hasSpecificRecord = true;
-            return rec;
-          }
-        }
-      }
-
-      return normalizeSalaryRecord({
-        hasSpecificRecord: false,
-        grade: emp.grade || 10,
-        allowanceCount: emp.allowanceCount || 0,
-        allowanceMonth: emp.allowanceMonth || 0,
-        allowanceYear: emp.allowanceYear || 0,
-        basicSalary: Number(emp.basicSalary) || 0,
-        teachingAllowance: Number(emp.teachingAllowance) || 0,
-        otherAllowance1: Number(emp.otherAllowance1) || 0,
-        otherAllowance2: Number(emp.otherAllowance2) || 0,
-        otherAllowance3: Number(emp.otherAllowance3) || 0,
-        grossSalary: Number(emp.grossSalary) || (Number(emp.basicSalary) || 0),
-        pensionDeduct: Number(emp.pensionDeduct) || 0,
-        solidarityDeduct: Number(emp.solidarityDeduct) || 0,
-        medicalDeduct: Number(emp.medicalDeduct) || 0,
-        absenceDeduct: Number(emp.absenceDeduct) || 0,
-        otherDeductions: Number(emp.otherDeductions) || 0,
-        totalDeductions: Number(emp.totalDeductions) || 0,
-        netSalary: Number(emp.netSalary) || ((Number(emp.grossSalary) || 0) - (Number(emp.totalDeductions) || 0)),
-        transferredTo: emp.transferredTo || 'الضمان الاجتماعي',
-        lastPaymentDate: emp.lastPaymentDate || '30/06/2026'
-      }, emp);
+      const mNum=MONTH_MAP[monthStr]||Number(monthStr)||9,yNum=Number(yearStr)||2026;
+      const keys=[`${yNum}-${mNum}`,`${mNum}`,monthStr,`${mNum}-${yNum}`];
+      for(const k of keys){if(emp.monthlyData?.[k]){const rec=normalizeSalaryRecord(emp.monthlyData[k],emp);rec.hasSpecificRecord=true;return rec;}}
+      return null;
     }
 
     /* التحديث الفوري المباشر لورقة شهادة مرتب */
@@ -2864,6 +2915,13 @@
       const branch = (branchInput?.value || emp.branch || 'جردينة').trim();
 
       const sal = getEmployeeSalaryForPeriod(emp, month, year);
+      document.getElementById('printSalaryMonth').textContent = month;
+      document.getElementById('printSalaryYear').textContent = year;
+      if (!sal) {
+        ['printSalaryGrade','printSalaryAllowCount','printSalaryBasic','printSalaryTeaching','printSalaryOther1','printSalaryOther2','printSalaryOther3','printSalaryGross','printSalaryPension','printSalarySolidarity','printSalaryMedical','printSalaryAbsence','printSalaryOtherDeduct','printSalaryTotalDeduct','printSalaryNetNum'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='--';});
+        const t=document.getElementById('printSalaryNetText');if(t)t.textContent='لا توجد بيانات مالية لهذا الشهر';
+        return;
+      }
 
       document.getElementById('printSalaryFinNo').textContent = emp.financialNo || '--';
       document.getElementById('printSalaryNatNo').textContent = emp.nationalNo || '--';
@@ -2919,7 +2977,10 @@
       if (!emp) return;
 
       const sal = getEmployeeSalaryForPeriod(emp, month, year);
+      document.getElementById('summaryMonthName').textContent = `${month} ${year}`;
+      if (!sal) { summaryBox.style.display='flex'; ['summaryBasic','summaryGross','summaryDeduct','summaryNet'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='لا توجد';}); const badge=document.getElementById('summaryRecordTypeBadge'); if(badge){badge.textContent='لا توجد بيانات مالية لهذا الشهر';badge.style.background='#fee2e2';badge.style.color='#b91c1c';} return; }
       summaryBox.style.display = 'flex';
+      const badge=document.getElementById('summaryRecordTypeBadge'); if(badge){badge.textContent='سجل شهري معتمد';badge.style.background='#dcfce7';badge.style.color='#15803d';}
       document.getElementById('summaryMonthName').textContent = `${month} ${year}`;
       document.getElementById('summaryBasic').textContent = sal.basicSalary.toFixed(3);
       document.getElementById('summaryGross').textContent = sal.grossSalary.toFixed(3);
@@ -2953,8 +3014,11 @@
       const branch = (branchInput?.value || emp.branch || 'سلوق').trim();
 
       const sal = getEmployeeSalaryForPeriod(emp, month, year);
-
       document.getElementById('lpPrintDate').textContent = formattedDate;
+      document.getElementById('lpPrintMonth').textContent = month;
+      document.getElementById('lpPrintYear').textContent = year;
+      if (!sal) { ['lpPrintGrade','lpPrintAllow','lpPrintGross','lpTableBasic','lpTableTeaching','lpTableOther1','lpTableOther2','lpTableOther3','lpTableGross'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='--';}); const t=document.getElementById('lpPrintGrossWords');if(t)t.textContent='لا توجد بيانات مالية لهذا الشهر'; return; }
+
       document.getElementById('lpPrintFinNo').textContent = emp.financialNo || '--';
       document.getElementById('lpPrintNatNo').textContent = emp.nationalNo || '--';
       document.getElementById('lpPrintEmpName').textContent = emp.name || '--';
@@ -2966,9 +3030,6 @@
       document.getElementById('lpPrintAllow').textContent = sal.allowanceCount || 0;
       document.getElementById('lpPrintGross').textContent = sal.grossSalary.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
       document.getElementById('lpPrintGrossWords').textContent = tafqeetLibyanDinar(sal.grossSalary).replace('فقط ', '').replace(' لا غير', '');
-      document.getElementById('lpPrintMonth').textContent = month;
-      document.getElementById('lpPrintYear').textContent = year;
-
       document.getElementById('lpTableBasic').textContent = sal.basicSalary.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
       document.getElementById('lpTableTeaching').textContent = sal.teachingAllowance > 0 ? sal.teachingAllowance.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3}) : '0';
       document.getElementById('lpTableOther1').textContent = sal.otherAllowance1 > 0 ? sal.otherAllowance1.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3}) : '0';
@@ -3425,158 +3486,102 @@
       alert('تم تحديث الملف الشخصي بنجاح!');
     }
 
-    /* محرك استيراد ملفات Excel الذكي والمعالج لكافة الملفات والكشوفات */
-    function handleExcelUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+    /* =====================================================================
+       محرك استيراد ملفات Excel الشهري — معزول عن بيانات هوية الموظف
+       هوية الموظف: الرقم المالي + الرقم الوطني + الاسم (لا تتكرر ولا تُستبدل).
+       البيانات المالية: تحفظ داخل monthlyData تحت المفتاح YYYY-M وتُستبدل
+       فقط عند إعادة رفع نفس الشهر والسنة.
+       ===================================================================== */
+    let pendingExcelImportPeriod = null;
+    const EXCEL_IMPORT_MONTH_NAMES = {1:'يناير',2:'فبراير',3:'مارس',4:'أبريل',5:'مايو',6:'يونيو',7:'يوليو',8:'أغسطس',9:'سبتمبر',10:'أكتوبر',11:'نوفمبر',12:'ديسمبر'};
 
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const data = new Uint8Array(evt.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
+    function openExcelImportModal() {
+      const modal=document.getElementById('excel-import-modal'); if(!modal)return;
+      updateExcelImportPeriodStatus(); modal.style.display='flex';
+    }
+    function closeExcelImportModal() { const modal=document.getElementById('excel-import-modal'); if(modal)modal.style.display='none'; }
+    function updateExcelImportPeriodStatus() {
+      const y=Number(document.getElementById('excelImportYear')?.value)||2026, m=Number(document.getElementById('excelImportMonth')?.value)||9, key=`${y}-${m}`;
+      const exists=(employeesData||[]).some(emp=>emp?.monthlyData&&emp.monthlyData[key]); const el=document.getElementById('excelImportPeriodStatus'); if(!el)return;
+      el.innerHTML=exists?`<span style="color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation"></i> توجد بيانات مستوردة مسبقاً للفترة ${EXCEL_IMPORT_MONTH_NAMES[m]} ${y} — سيتم استبدالها بعد التأكيد.</span>`:`<span style="color:#047857;"><i class="fa-solid fa-circle-check"></i> لا توجد بيانات مستوردة مسبقاً للفترة ${EXCEL_IMPORT_MONTH_NAMES[m]} ${y}.</span>`;
+    }
+    document.addEventListener('change',ev=>{if(ev.target?.id==='excelImportYear'||ev.target?.id==='excelImportMonth')updateExcelImportPeriodStatus();});
+    function normalizeIdentityValue(v){return String(v??'').trim().replace(/\s+/g,' ');}
+    function getLatestMonthlyKey(emp){
+      const keys=Object.keys(emp?.monthlyData||{}).filter(k=>/^\d{4}-(?:[1-9]|1[0-2])$/.test(k));
+      return keys.sort((a,b)=>{const [ay,am]=a.split('-').map(Number),[by,bm]=b.split('-').map(Number);return (ay*12+am)-(by*12+bm);}).pop()||null;
+    }
+    function shouldBecomeCurrentPeriod(emp,key){
+      const latest=getLatestMonthlyKey(emp); if(!latest)return true; const [y,m]=key.split('-').map(Number),[ly,lm]=latest.split('-').map(Number); return y*12+m>=ly*12+lm;
+    }
+    function applyMonthlyRecordAsCurrent(emp,r){
+      emp.grade=r.grade||emp.grade||10; emp.allowanceCount=r.allowanceCount||0; emp.allowanceMonth=r.allowanceMonth||0; emp.allowanceYear=r.allowanceYear||0;
+      ['basicSalary','teachingAllowance','otherAllowance1','otherAllowance2','otherAllowance3','grossSalary','pensionDeduct','solidarityDeduct','medicalDeduct','absenceDeduct','otherDeductions','totalDeductions','netSalary'].forEach(k=>{emp[k]=Number(r[k])||0;});
+      if(r.transferredTo)emp.transferredTo=r.transferredTo; if(r.lastPaymentDate)emp.lastPaymentDate=r.lastPaymentDate;
+    }
+    function startExcelImport(){
+      const year=Number(document.getElementById('excelImportYear')?.value),month=Number(document.getElementById('excelImportMonth')?.value);
+      if(!year||month<1||month>12){alert('يرجى اختيار السنة والشهر بشكل صحيح قبل اختيار ملف Excel.');return;}
+      const key=`${year}-${month}`, exists=(employeesData||[]).some(emp=>emp?.monthlyData&&emp.monthlyData[key]);
+      if(exists&&!confirm(`تحذير مهم!\n\nالفترة ${EXCEL_IMPORT_MONTH_NAMES[month]} ${year} تم رفعها سابقاً.\nسيتم استبدال البيانات المالية لهذه الفترة فقط بالملف الجديد.\n\nبيانات الموظف الأساسية (الاسم والرقم الوطني والرقم المالي) لن تُنشأ منها نسخ مكررة ولن يتم استبدالها.\n\nهل تريد المتابعة؟`))return;
+      pendingExcelImportPeriod={year,month,key}; closeExcelImportModal(); const input=document.getElementById('excelFileInput'); if(!input)return; input.value=''; input.click();
+    }
 
-          let parsedEmployeesMap = {};
-          employeesData.forEach(emp => {
-            parsedEmployeesMap[emp.financialNo] = emp;
-          });
-
-          workbook.SheetNames.forEach(sheetName => {
-            const worksheet = workbook.Sheets[sheetName];
-            const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            if (!rows || rows.length < 2) return;
-
-            let sheetDefaultMonth = 9;
-            const cleanedSheet = sheetName.trim();
-            for (const [mName, mNum] of Object.entries(MONTH_MAP)) {
-              if (cleanedSheet.includes(mName)) {
-                sheetDefaultMonth = mNum;
-                break;
+    function handleExcelUpload(e){
+      const file=e.target.files?.[0], period=pendingExcelImportPeriod; if(!file||!period){if(e.target)e.target.value='';return;}
+      const reader=new FileReader(); reader.onload=async function(evt){
+        try{
+          const workbook=XLSX.read(new Uint8Array(evt.target.result),{type:'array'});
+          const workingEmployees=JSON.parse(JSON.stringify(employeesData||[])), byFinancial=new Map(), byNational=new Map();
+          workingEmployees.forEach(emp=>{if(emp?.financialNo)byFinancial.set(normalizeIdentityValue(emp.financialNo),emp); if(emp?.nationalNo)byNational.set(normalizeIdentityValue(emp.nationalNo),emp); emp.monthlyData=(emp.monthlyData&&typeof emp.monthlyData==='object')?emp.monthlyData:{};});
+          let importedRows=0,newEmployees=0,replacedRows=0,skippedRows=0; const conflicts=[];
+          const seenFileFinancial = new Map();
+          const seenFileNational = new Map();
+          workbook.SheetNames.forEach(sheetName=>{
+            const rows=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,defval:''}); if(!rows||rows.length<2)return;
+            let headerIdx=-1; for(let i=0;i<Math.min(rows.length,15);i++){const str=(rows[i]||[]).map(v=>String(v??'')).join(' ').toLowerCase(); if((str.includes('رقم')&&str.includes('مالي'))||str.includes('الاسم')||str.includes('المرتب الأساسي')||str.includes('اساسي')){headerIdx=i;break;}} if(headerIdx<0)headerIdx=0;
+            const colMap=resolveColumnsAccurate(rows[headerIdx]);
+            if(colMap.finNo===undefined||colMap.natNo===undefined||colMap.name===undefined)throw new Error(`تعذر التعرف على خانات الهوية في الورقة «${sheetName}». يجب وجود: الرقم المالي، الرقم الوطني، الاسم.`);
+            for(let r=headerIdx+1;r<rows.length;r++){
+              const parsed=parseExcelRowData(colMap,rows[r]||[]), fin=normalizeIdentityValue(parsed.finNo),nat=normalizeIdentityValue(parsed.natNo),name=normalizeIdentityValue(parsed.name);
+              if(!fin&&!nat&&!name)continue; if(!fin||!nat||!name){skippedRows++;continue;}
+              if (seenFileFinancial.has(fin) && seenFileFinancial.get(fin) !== nat) {
+                conflicts.push(`صف ${r+1}: الرقم المالي ${fin} ظهر مع رقم وطني مختلف داخل نفس الملف.`);
+                continue;
               }
-            }
-
-            let headerIdx = -1;
-            for (let i = 0; i < Math.min(rows.length, 10); i++) {
-              const rowStr = (rows[i] || []).join(' ');
-              if (rowStr.includes('مالي') || rowStr.includes('الاسم') || rowStr.includes('أساسي') || rowStr.includes('اساسي')) {
-                headerIdx = i;
-                break;
+              if (seenFileNational.has(nat) && seenFileNational.get(nat) !== fin) {
+                conflicts.push(`صف ${r+1}: الرقم الوطني ${nat} ظهر مع رقم مالي مختلف داخل نفس الملف.`);
+                continue;
               }
-            }
-            if (headerIdx === -1) headerIdx = 0;
+              seenFileFinancial.set(fin,nat); seenFileNational.set(nat,fin);
 
-            const headers = rows[headerIdx];
-            const colMap = resolveColumnsAccurate(headers);
-
-            for (let r = headerIdx + 1; r < rows.length; r++) {
-              const row = rows[r];
-              if (!row || row.length === 0) continue;
-
-              const parsed = parseExcelRowData(colMap, row);
-              if (!parsed.name && !parsed.finNo) continue;
-
-              const finKey = parsed.finNo || ('FIN_' + Math.floor(Math.random()*1000000));
-              let rowMonthNum = sheetDefaultMonth;
-              if (parsed.month && MONTH_MAP[parsed.month]) {
-                rowMonthNum = MONTH_MAP[parsed.month];
+              const ef=byFinancial.get(fin)||null,en=byNational.get(nat)||null; if(ef&&en&&ef.id!==en.id){conflicts.push(`صف ${r+1}: الرقم المالي ${fin} والرقم الوطني ${nat} يعودان لسجلين مختلفين.`);continue;}
+              if (ef && normalizeIdentityValue(ef.nationalNo) !== nat) {
+                conflicts.push(`صف ${r+1}: الرقم المالي ${fin} مرتبط في المنظومة برقم وطني مختلف.`);
+                continue;
               }
-              const rowYearNum = parsed.year ? parseInt(parsed.year, 10) : 2026;
-
-              if (!parsedEmployeesMap[finKey]) {
-                parsedEmployeesMap[finKey] = {
-                  id: 'emp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                  financialNo: finKey,
-                  nationalNo: parsed.natNo || '120000000000',
-                  name: parsed.name || 'موظف تعليم سلوق',
-                  bank: parsed.bank || 'مصرف الوحدة',
-                  branch: parsed.branch || 'سلوق',
-                  accountNo: parsed.account || '0000000000',
-                  iban: parsed.iban || ('LY33005' + (parsed.account || '0000000000')),
-                  grade: parsed.grade || 10,
-                  allowanceCount: parsed.allowCount || 0,
-                  allowanceMonth: parsed.allowMonth || 0,
-                  allowanceYear: parsed.allowYear || 0,
-                  basicSalary: parsed.basic,
-                  teachingAllowance: parsed.teaching,
-                  otherAllowance1: parsed.otherAllow1,
-                  otherAllowance2: parsed.otherAllow2,
-                  otherAllowance3: 0,
-                  grossSalary: parsed.gross,
-                  pensionDeduct: parsed.pension,
-                  solidarityDeduct: parsed.solidarity,
-                  medicalDeduct: parsed.medical,
-                  absenceDeduct: parsed.absenceDeduct,
-                  otherDeductions: parsed.otherDeductions,
-                  totalDeductions: parsed.totalDeductions,
-                  netSalary: parsed.net,
-                  transferredTo: parsed.transferTo || 'الضمان الاجتماعي',
-                  lastPaymentDate: parsed.lastPaymentDate || '30/06/2026',
-                  monthlyData: {}
-                };
+              if (en && normalizeIdentityValue(en.financialNo) !== fin) {
+                conflicts.push(`صف ${r+1}: الرقم الوطني ${nat} مرتبط في المنظومة برقم مالي مختلف.`);
+                continue;
               }
-
-              parsedEmployeesMap[finKey].monthlyData[`${rowYearNum}-${rowMonthNum}`] = {
-                grade: parsed.grade || parsedEmployeesMap[finKey].grade,
-                allowanceCount: parsed.allowCount || 0,
-                allowanceMonth: parsed.allowMonth || 0,
-                allowanceYear: parsed.allowYear || 0,
-                basicSalary: parsed.basic,
-                teachingAllowance: parsed.teaching,
-                otherAllowance1: parsed.otherAllow1,
-                otherAllowance2: parsed.otherAllow2,
-                otherAllowance3: 0,
-                grossSalary: parsed.gross,
-                pensionDeduct: parsed.pension,
-                solidarityDeduct: parsed.solidarity,
-                medicalDeduct: parsed.medical,
-                absenceDeduct: parsed.absenceDeduct,
-                otherDeductions: parsed.otherDeductions,
-                totalDeductions: parsed.totalDeductions,
-                netSalary: parsed.net,
-                transferredTo: parsed.transferTo || parsedEmployeesMap[finKey].transferredTo,
-                lastPaymentDate: parsed.lastPaymentDate || parsedEmployeesMap[finKey].lastPaymentDate
-              };
-
-              if (rowMonthNum >= 6) {
-                parsedEmployeesMap[finKey].basicSalary = parsed.basic;
-                parsedEmployeesMap[finKey].grossSalary = parsed.gross;
-                parsedEmployeesMap[finKey].netSalary = parsed.net;
-                parsedEmployeesMap[finKey].totalDeductions = parsed.totalDeductions;
-                parsedEmployeesMap[finKey].grade = parsed.grade || parsedEmployeesMap[finKey].grade;
-                parsedEmployeesMap[finKey].allowanceCount = parsed.allowCount || parsedEmployeesMap[finKey].allowanceCount;
-                if (parsed.bank) parsedEmployeesMap[finKey].bank = parsed.bank;
-                if (parsed.account) parsedEmployeesMap[finKey].accountNo = parsed.account;
-                if (parsed.iban) parsedEmployeesMap[finKey].iban = parsed.iban;
+              let emp=ef||en;
+              if(!emp){
+                emp={id:'emp_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),financialNo:fin,nationalNo:nat,name,bank:parsed.bank||'مصرف الوحدة',branch:parsed.branch||'سلوق',accountNo:parsed.account||'',iban:parsed.iban||'',grade:parsed.grade||10,allowanceCount:parsed.allowCount||0,allowanceMonth:parsed.allowMonth||0,allowanceYear:parsed.allowYear||0,basicSalary:0,teachingAllowance:0,otherAllowance1:0,otherAllowance2:0,otherAllowance3:0,grossSalary:0,pensionDeduct:0,solidarityDeduct:0,medicalDeduct:0,absenceDeduct:0,otherDeductions:0,totalDeductions:0,netSalary:0,transferredTo:parsed.transferTo||'الضمان الاجتماعي',lastPaymentDate:parsed.lastPaymentDate||'30/06/2026',monthlyData:{}};
+                workingEmployees.push(emp);byFinancial.set(fin,emp);byNational.set(nat,emp);newEmployees++;
               }
+              const old=emp.monthlyData[period.key];
+              const rec=normalizeSalaryRecord({grade:parsed.grade||emp.grade||10,allowanceCount:parsed.allowCount||0,allowanceMonth:parsed.allowMonth||0,allowanceYear:parsed.allowYear||0,basicSalary:parsed.basic,teachingAllowance:parsed.teaching,otherAllowance1:parsed.otherAllow1,otherAllowance2:parsed.otherAllow2,otherAllowance3:0,grossSalary:parsed.gross,pensionDeduct:parsed.pension,solidarityDeduct:parsed.solidarity,medicalDeduct:parsed.medical,absenceDeduct:parsed.absenceDeduct,otherDeductions:parsed.otherDeductions,totalDeductions:parsed.totalDeductions,netSalary:parsed.net,transferredTo:parsed.transferTo||emp.transferredTo||'الضمان الاجتماعي',lastPaymentDate:parsed.lastPaymentDate||emp.lastPaymentDate||'30/06/2026'},emp);
+              emp.monthlyData[period.key]=rec; importedRows++; if(old)replacedRows++; if(shouldBecomeCurrentPeriod(emp,period.key))applyMonthlyRecordAsCurrent(emp,rec);
             }
           });
-
-          employeesData = Object.values(parsedEmployeesMap);
-          repairEmployeesData();
-          saveEmployeesToStorage();
-
-          /* تحديث الواجهة منفصل تماماً عن قراءة الملف حتى لا يُنسب أي خلل في العرض إلى ملف الإكسل */
-          try {
-            empCurrentPage = 1;
-            renderEmployeesTable();
-            populateEmployeeSelects();
-            renderAllowanceList();
-            updateDashboardCalculations();
-            onCertMonthYearChange();
-            updateSalaryCertSheet();
-            updateLastPayCertSheet();
-          } catch (uiErr) {
-            console.error('خطأ في تحديث الواجهة بعد الاستيراد:', uiErr);
-          }
-
-          alert(`تم استيراد ومعالجة ${employeesData.length} موظفاً بنجاح وربط كافة الحقول الشهرية دون أي تداخل!`);
-        } catch (error) {
-          console.error(error);
-          alert('حدث خطأ أثناء قراءة ملف الإكسل:\n' + (error && error.message ? error.message : error) +
-                '\n\nيرجى التأكد من سلامة الملف ومن وجود صف العناوين (الرقم المالي / الاسم / المرتب الأساسي).');
-        }
-      };
-      reader.readAsArrayBuffer(file);
+          if(conflicts.length)throw new Error('تم إيقاف الاستيراد بالكامل لحماية البيانات. توجد تعارضات في هوية موظفين داخل الملف:\n\n'+conflicts.slice(0,8).join('\n')+(conflicts.length>8?`\n... ويوجد ${conflicts.length-8} تعارضات أخرى.`:''));
+          if(!importedRows)throw new Error('لم يتم العثور على صفوف موظفين صالحة للاستيراد. لم يتم تغيير أي بيانات.');
+          employeesData=workingEmployees; repairEmployeesData(); saveEmployeesToStorage();
+          try{empCurrentPage=1;renderEmployeesTable();populateEmployeeSelects();renderAllowanceList();updateDashboardCalculations();onCertMonthYearChange();updateSalaryCertSheet();updateLastPayCertSheet();}catch(uiErr){console.error('خطأ في تحديث الواجهة بعد الاستيراد:',uiErr);}
+          alert(`تم استيراد ${importedRows.toLocaleString('en-US')} سجل مالي إلى ${EXCEL_IMPORT_MONTH_NAMES[period.month]} ${period.year} بنجاح.\n\nالموظفون الجدد: ${newEmployees.toLocaleString('en-US')}\nالسجلات المستبدلة لنفس الشهر: ${replacedRows.toLocaleString('en-US')}\nالصفوف غير المكتملة التي تم تجاهلها: ${skippedRows.toLocaleString('en-US')}\n\nتم الحفاظ على هوية الموظف ومنع تكرار الرقم المالي أو الرقم الوطني.`);
+        }catch(error){console.error(error);alert('تم إيقاف الاستيراد دون حفظ التغييرات لحماية البيانات.\n\n'+(error?.message||error));}
+        finally{pendingExcelImportPeriod=null;if(e.target)e.target.value='';updateExcelImportPeriodStatus();}
+      }; reader.readAsArrayBuffer(file);
     }
 
     function resolveColumnsAccurate(headers) {
