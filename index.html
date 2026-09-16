@@ -1258,7 +1258,14 @@
                 </div>
               </div>
 
-              <div class="form-group" style="grid-column: 1 / -1;">
+              <div class="form-group">
+                <label class="form-label">فرع المصرف في الشهادة (اكتبه يدوياً قبل الطباعة) *</label>
+                <div class="input-wrapper">
+                  <input type="text" id="certBranchInput" value="جردينة" required oninput="syncBranchInput('salary', this.value)">
+                </div>
+              </div>
+
+              <div class="form-group">
                 <label class="form-label">الجهة الموجه إليها الشهادة (تظهر بعد كلمة: إلى / ) *</label>
                 <div class="input-wrapper">
                   <input type="text" id="certDestination" value="مدير مصرف الوحدة فرع جردينة المحترم" oninput="syncDestInput('salary', this.value)">
@@ -1348,7 +1355,14 @@
                 </div>
               </div>
 
-              <div class="form-group" style="grid-column: 1 / -1;">
+              <div class="form-group">
+                <label class="form-label">فرع المصرف في الشهادة (اكتبه يدوياً قبل الطباعة) *</label>
+                <div class="input-wrapper">
+                  <input type="text" id="lastPayBranchInput" value="سلوق" required oninput="syncBranchInput('lastpay', this.value)">
+                </div>
+              </div>
+
+              <div class="form-group">
                 <label class="form-label">الجهة المنقول إليها (تظهر بعد كلمة: إلى / ) *</label>
                 <div class="input-wrapper">
                   <input type="text" id="lastPayDest" value="الضمان الاجتماعي" oninput="syncDestInput('lastpay', this.value)">
@@ -2183,11 +2197,12 @@
   <div id="add-emp-modal" class="modal-overlay">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
-        <h3 style="color:var(--primary); font-size:1.15rem;"><i class="fa-solid fa-user-plus"></i> تسجيل موظف جديد</h3>
+        <h3 id="addEmpModalTitle" style="color:var(--primary); font-size:1.15rem;"><i class="fa-solid fa-user-plus"></i> تسجيل موظف جديد</h3>
         <button onclick="closeAddEmpModal()" style="border:none; background:transparent; cursor:pointer; font-size:1.2rem;"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <form onsubmit="saveNewEmployee(event)">
+        <input type="hidden" id="employeeEditId" value="">
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">الاسم رباعياً *</label>
@@ -2214,12 +2229,21 @@
             <input type="text" id="newEmpAcc" required style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px;">
           </div>
           <div class="form-group">
-            <label class="form-label">الدرجة</label>
-            <input type="number" id="newEmpGrade" value="10" style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px;">
+            <label class="form-label">الدرجة *</label>
+            <select id="newEmpGrade" required onchange="updateEmpSalaryScaleFields()" style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px;">
+              <option value="1">الأولى (1)</option><option value="2">الثانية (2)</option><option value="3">الثالثة (3)</option><option value="4">الرابعة (4)</option><option value="5">الخامسة (5)</option><option value="6">السادسة (6)</option><option value="7">السابعة (7)</option><option value="8">الثامنة (8)</option><option value="9">التاسعة (9)</option><option value="10" selected>العاشرة (10)</option><option value="11">الحادية عشرة (11)</option><option value="12">الثانية عشرة (12)</option><option value="13">الثالثة عشرة (13)</option><option value="14">الرابعة عشرة (14)</option>
+            </select>
           </div>
           <div class="form-group">
-            <label class="form-label">المرتب الأساسي (د.ل) *</label>
-            <input type="number" step="0.001" id="newEmpBasic" value="2055.000" required style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px;">
+            <label class="form-label">عدد العلاوات الحالية *</label>
+            <select id="newEmpAllowCount" required onchange="updateEmpSalaryScaleFields()" style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px;">
+              <option value="0" selected>0 علاوات</option><option value="1">1 علاوة</option><option value="2">2 علاوات</option><option value="3">3 علاوات</option><option value="4">4 علاوات</option><option value="5">5 علاوات</option><option value="6">6 علاوات</option><option value="7">7 علاوات</option><option value="8">8 علاوات</option><option value="9">9 علاوات</option><option value="10">10 علاوات</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">المرتب الأساسي (يُظهر تلقائياً من جدول المرتبات)</label>
+            <input type="number" step="0.001" id="newEmpBasic" value="1855.000" readonly required style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px; background:#f1f5f9; font-weight:800;">
+            <div id="newEmpNetPreview" style="margin-top:6px; padding:7px 9px; border-radius:6px; background:#ecfdf5; color:#047857; font-weight:800; font-size:0.82rem;">الصافي حسب الجدول: 1,741.381 د.ل</div>
           </div>
           <div class="form-group">
             <label class="form-label">شهر العلاوة السنوية</label>
@@ -2239,15 +2263,12 @@
               <option value="12">ديسمبر (12)</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">عدد العلاوات الحالية</label>
-            <input type="number" id="newEmpAllowCount" value="0" style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px;">
-          </div>
+
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
           <button type="button" class="btn btn-secondary" onclick="closeAddEmpModal()">إلغاء</button>
-          <button type="submit" class="btn btn-primary">حفظ الموظف</button>
+          <button type="submit" id="employeeSaveBtn" class="btn btn-primary">حفظ الموظف</button>
         </div>
       </form>
     </div>
@@ -2261,6 +2282,109 @@
     const STORAGE_USERS_KEY = 'suluq_finance_users_v8';
     const STORAGE_FONT_KEY = 'suluq_finance_font_v4';
     const STORAGE_LPTRIO_KEY = 'suluq_finance_lptrio_v1';
+
+    /* تخزين قوي للعمل دون إنترنت: IndexedDB هو المخزن الأساسي للموظفين،
+       مع الإبقاء على localStorage كنسخة توافقية/ترحيل للبيانات القديمة. */
+    const FINANCE_DB_NAME = 'suluq_finance_database_v1';
+    const FINANCE_DB_VERSION = 1;
+    const FINANCE_EMP_STORE = 'employees';
+    let financeDB = null;
+
+    /* جدول المرتبات المرفق: الأساس حسب الدرجة وعدد العلاوات (0..10).
+       الصافي = الأساسي - (5.125% ضمان + 1% تضامن) = 93.875% من الأساسي،
+       وهو ما يطابق القيم الظاهرة في الجدول حتى ثلاثة أرقام عشرية. */
+    const SALARY_SCALE = {
+      1:  { start: 750,  step: 25 },
+      2:  { start: 875,  step: 25 },
+      3:  { start: 975,  step: 25 },
+      4:  { start: 1075, step: 25 },
+      5:  { start: 1175, step: 25 },
+      6:  { start: 1275, step: 25 },
+      7:  { start: 1375, step: 40 },
+      8:  { start: 1575, step: 40 },
+      9:  { start: 1695, step: 40 },
+      10: { start: 1855, step: 40 },
+      11: { start: 2055, step: 50 },
+      12: { start: 2405, step: 50 },
+      13: { start: 2755, step: 50 },
+      14: { start: 3105, step: 50 }
+    };
+
+    function getScaleSalary(grade, allowanceCount) {
+      const g = parseInt(grade, 10);
+      const a = Math.max(0, Math.min(10, parseInt(allowanceCount, 10) || 0));
+      const row = SALARY_SCALE[g] || SALARY_SCALE[10];
+      const basic = row.start + row.step * a;
+      const pension = basic * 0.05125;
+      const solidarity = basic * 0.01;
+      const totalDeductions = pension + solidarity;
+      const net = basic - totalDeductions;
+      return { basic, pension, solidarity, totalDeductions, net };
+    }
+
+    function openFinanceDB() {
+      return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) { reject(new Error('IndexedDB غير مدعوم')); return; }
+        const req = indexedDB.open(FINANCE_DB_NAME, FINANCE_DB_VERSION);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(FINANCE_EMP_STORE)) {
+            const store = db.createObjectStore(FINANCE_EMP_STORE, { keyPath: 'id' });
+            store.createIndex('financialNo', 'financialNo', { unique: false });
+            store.createIndex('nationalNo', 'nationalNo', { unique: false });
+            store.createIndex('name', 'name', { unique: false });
+            store.createIndex('bank', 'bank', { unique: false });
+          }
+        };
+        req.onsuccess = () => { financeDB = req.result; resolve(financeDB); };
+        req.onerror = () => reject(req.error || new Error('تعذر فتح قاعدة البيانات'));
+      });
+    }
+
+    function idbGetAllEmployees() {
+      return new Promise((resolve, reject) => {
+        if (!financeDB) { reject(new Error('قاعدة البيانات غير مهيأة')); return; }
+        const tx = financeDB.transaction(FINANCE_EMP_STORE, 'readonly');
+        const req = tx.objectStore(FINANCE_EMP_STORE).getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error || new Error('فشل قراءة بيانات الموظفين'));
+      });
+    }
+
+    function idbPutEmployee(emp) {
+      return new Promise((resolve, reject) => {
+        if (!financeDB) { resolve(false); return; }
+        const tx = financeDB.transaction(FINANCE_EMP_STORE, 'readwrite');
+        tx.objectStore(FINANCE_EMP_STORE).put(emp);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error || new Error('فشل حفظ الموظف'));
+        tx.onabort = () => reject(tx.error || new Error('تم إلغاء حفظ الموظف'));
+      });
+    }
+
+    function idbDeleteEmployee(empId) {
+      return new Promise((resolve, reject) => {
+        if (!financeDB) { resolve(false); return; }
+        const tx = financeDB.transaction(FINANCE_EMP_STORE, 'readwrite');
+        tx.objectStore(FINANCE_EMP_STORE).delete(empId);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error || new Error('فشل حذف الموظف'));
+        tx.onabort = () => reject(tx.error || new Error('تم إلغاء حذف الموظف'));
+      });
+    }
+
+    function idbReplaceAllEmployees(list) {
+      return new Promise((resolve, reject) => {
+        if (!financeDB) { resolve(false); return; }
+        const tx = financeDB.transaction(FINANCE_EMP_STORE, 'readwrite');
+        const store = tx.objectStore(FINANCE_EMP_STORE);
+        store.clear();
+        for (const emp of (list || [])) store.put(emp);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error || new Error('فشل استبدال سجل الموظفين'));
+        tx.onabort = () => reject(tx.error || new Error('تم إلغاء استبدال سجل الموظفين'));
+      });
+    }
 
     /* ==============================================================
        الشعار الرسمي مدمج داخل الكود (لا حاجة لرفعه في كل مرة)
@@ -2328,12 +2452,15 @@
     const empPageSize = 10;
     let banksChart = null;
     let salaryPieChart = null;
+    let lastCertBranchEmpId = null;
+    let lastPayBranchEmpId = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       loadSavedLogo();
-      loadStoredData();
       loadLastPayTrio();
       loadSavedFont();
+      await loadStoredData();
+      updateEmpSalaryScaleFields();
       renderEmployeesTable();
       populateEmployeeSelects();
       updateDashboardCalculations();
@@ -2463,12 +2590,31 @@
       });
     }
 
-    function loadStoredData() {
-      const savedEmps = localStorage.getItem(STORAGE_EMP_KEY);
-      if (savedEmps) {
-        try { employeesData = JSON.parse(savedEmps); } catch(e){}
+    async function loadStoredData() {
+      let loadedFromDB = false;
+      try {
+        await openFinanceDB();
+        const dbEmployees = await idbGetAllEmployees();
+        if (dbEmployees.length) {
+          employeesData = dbEmployees;
+          loadedFromDB = true;
+        }
+      } catch (dbErr) {
+        console.warn('تعذر استخدام IndexedDB؛ سيتم الرجوع إلى التخزين المحلي:', dbErr);
       }
+
+      if (!loadedFromDB) {
+        const savedEmps = localStorage.getItem(STORAGE_EMP_KEY);
+        if (savedEmps) {
+          try { employeesData = JSON.parse(savedEmps); } catch(e) { console.warn('تعذر قراءة بيانات الموظفين القديمة:', e); }
+        }
+        if (financeDB && employeesData && employeesData.length) {
+          try { await idbReplaceAllEmployees(employeesData); } catch (e) { console.warn('فشل ترحيل بيانات الموظفين إلى IndexedDB:', e); }
+        }
+      }
+
       repairEmployeesData();
+
       const savedSigs = localStorage.getItem(STORAGE_SIG_KEY);
       if (savedSigs) {
         try { signatoriesConfig = Object.assign(signatoriesConfig, JSON.parse(savedSigs)); } catch(e){}
@@ -2485,14 +2631,24 @@
     }
 
     function saveEmployeesToStorage() {
-      try {
-        localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData));
-      } catch (err) {
-        console.warn('تجاوزت البيانات سعة التخزين المحلي:', err);
+      /* IndexedDB هو المصدر الأساسي؛ عملية المعاملة تدعم أحجام بيانات كبيرة دون حد 5MB الخاص بـ localStorage. */
+      if (financeDB) {
+        idbReplaceAllEmployees(employeesData).catch(err => console.error('خطأ في حفظ سجل الموظفين:', err));
+      } else {
+        try { localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData)); }
+        catch (err) { console.warn('تعذر حفظ سجل الموظفين محلياً:', err); }
       }
       updateDashboardCalculations();
     }
 
+    async function saveSingleEmployeeToStorage(emp) {
+      if (financeDB) {
+        await idbPutEmployee(emp);
+      } else {
+        try { localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData)); }
+        catch (err) { console.warn('تعذر حفظ سجل الموظفين محلياً:', err); }
+      }
+    }
     function handleLogin(e) {
       e.preventDefault();
       const user = document.getElementById('loginUserSelect').value;
@@ -2569,6 +2725,18 @@
       } else {
         document.getElementById('lastPayDest').value = val;
         syncDestInput('lastpay', val);
+      }
+    }
+
+    /* إدخال الفرع يدوياً قبل الطباعة، مع مزامنة مباشرة مع ورقة الشهادة */
+    function syncBranchInput(type, val) {
+      const text = (val || '').trim() || '................................';
+      if (type === 'salary') {
+        const el = document.getElementById('printSalaryBranch');
+        if (el) el.textContent = text;
+      } else {
+        const el = document.getElementById('lpPrintBranch');
+        if (el) el.textContent = text;
       }
     }
 
@@ -2683,10 +2851,17 @@
 
       const emp = employeesData.find(e => e.id === empId);
       if (!emp) return;
+      const certBranch = document.getElementById('certBranchInput');
+      if (certBranch && lastCertBranchEmpId !== empId) {
+        certBranch.value = emp.branch || 'جردينة';
+        lastCertBranchEmpId = empId;
+      }
 
       const month = document.getElementById('certMonth').value;
       const year = document.getElementById('certYear').value;
       const dest = document.getElementById('certDestination').value.trim() || '................................................';
+      const branchInput = document.getElementById('certBranchInput');
+      const branch = (branchInput?.value || emp.branch || 'جردينة').trim();
 
       const sal = getEmployeeSalaryForPeriod(emp, month, year);
 
@@ -2697,7 +2872,7 @@
       if (document.getElementById('modalCertDestInput')) document.getElementById('modalCertDestInput').value = document.getElementById('certDestination').value;
 
       document.getElementById('printSalaryBank').textContent = emp.bank || 'الوحدة';
-      document.getElementById('printSalaryBranch').textContent = emp.branch || 'جردينة';
+      document.getElementById('printSalaryBranch').textContent = branch;
       document.getElementById('printSalaryAccount').textContent = emp.accountNo || '--';
 
       document.getElementById('printSalaryGrade').textContent = sal.grade || emp.grade || '11';
@@ -2761,6 +2936,11 @@
 
       const emp = employeesData.find(e => e.id === empId);
       if (!emp) return;
+      const lpBranch = document.getElementById('lastPayBranchInput');
+      if (lpBranch && lastPayBranchEmpId !== empId) {
+        lpBranch.value = emp.branch || 'سلوق';
+        lastPayBranchEmpId = empId;
+      }
 
       const dateVal = document.getElementById('lastPayDate').value || '2026-07-01';
       const parts = dateVal.split('-');
@@ -2769,6 +2949,8 @@
       const month = document.getElementById('lastPayMonth').value;
       const year = document.getElementById('lastPayYear').value;
       const dest = document.getElementById('lastPayDest').value.trim() || 'الضمان الاجتماعي';
+      const branchInput = document.getElementById('lastPayBranchInput');
+      const branch = (branchInput?.value || emp.branch || 'سلوق').trim();
 
       const sal = getEmployeeSalaryForPeriod(emp, month, year);
 
@@ -2800,7 +2982,7 @@
       document.getElementById('lpPrintLeaveDays').textContent = '0';
       document.getElementById('lpPrintPensionBalance').textContent = '0';
       document.getElementById('lpPrintBank').textContent = emp.bank || 'الصحاري';
-      document.getElementById('lpPrintBranch').textContent = emp.branch || 'سلوق';
+      document.getElementById('lpPrintBranch').textContent = branch;
       document.getElementById('lpPrintAcc').textContent = emp.accountNo || '--';
       document.getElementById('lpPrintIban').textContent = emp.iban || ('LY33005' + (emp.accountNo || ''));
 
@@ -3630,9 +3812,17 @@
           <td>${Number(e.totalDeductions).toFixed(3)}</td>
           <td><strong style="color:#047857;">${Number(e.netSalary).toFixed(3)}</strong></td>
           <td>
-            <button class="btn btn-primary" style="padding:4px 8px; font-size:0.78rem;" onclick="selectEmpForCert('${e.id}')">
-              شهادة مرتب
-            </button>
+            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+              <button class="btn btn-primary" style="padding:4px 8px; font-size:0.76rem;" onclick="selectEmpForCert('${e.id}')" title="شهادة مرتب">
+                <i class="fa-solid fa-file-invoice-dollar"></i> مرتب
+              </button>
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.76rem;" onclick="openEditEmpModal('${e.id}')" title="تعديل الموظف">
+                <i class="fa-solid fa-pen-to-square"></i> تعديل
+              </button>
+              <button class="btn btn-danger" style="padding:4px 8px; font-size:0.76rem;" onclick="deleteEmployee('${e.id}')" title="حذف الموظف">
+                <i class="fa-solid fa-trash"></i> حذف
+              </button>
+            </div>
           </td>
         </tr>
       `).join('');
@@ -3699,7 +3889,9 @@
     }
 
     function selectEmpForCert(empId) {
+      const emp = employeesData.find(e => e.id === empId);
       document.getElementById('certEmpSelect').value = empId;
+      lastCertBranchEmpId = null;
       switchNav('salary-cert');
       onCertMonthYearChange();
     }
@@ -3737,7 +3929,63 @@
       }
     }
 
+    function updateEmpSalaryScaleFields() {
+      const gradeEl = document.getElementById('newEmpGrade');
+      const allowEl = document.getElementById('newEmpAllowCount');
+      const basicEl = document.getElementById('newEmpBasic');
+      const previewEl = document.getElementById('newEmpNetPreview');
+      if (!gradeEl || !allowEl || !basicEl) return;
+
+      const sal = getScaleSalary(gradeEl.value, allowEl.value);
+      basicEl.value = sal.basic.toFixed(3);
+      if (previewEl) previewEl.textContent = `الصافي حسب الجدول: ${sal.net.toLocaleString('en-US', {minimumFractionDigits:3, maximumFractionDigits:3})} د.ل`;
+    }
+
+    function populateScaleSelectors(grade, allowance) {
+      const g = document.getElementById('newEmpGrade');
+      const a = document.getElementById('newEmpAllowCount');
+      if (g) g.value = String(grade || 10);
+      if (a) a.value = String(Math.max(0, Math.min(10, allowance || 0)));
+      updateEmpSalaryScaleFields();
+    }
+
+    function resetEmployeeForm() {
+      const form = document.querySelector('#add-emp-modal form');
+      if (form) form.reset();
+      document.getElementById('employeeEditId').value = '';
+      document.getElementById('addEmpModalTitle').innerHTML = '<i class="fa-solid fa-user-plus"></i> تسجيل موظف جديد';
+      const saveBtn = document.getElementById('employeeSaveBtn');
+      if (saveBtn) saveBtn.textContent = 'حفظ الموظف';
+      document.getElementById('newEmpBank').value = 'مصرف الوحدة';
+      document.getElementById('newEmpBranch').value = 'سلوق';
+      document.getElementById('newEmpAllowMonth').value = '0';
+      document.getElementById('newEmpGrade').value = '10';
+      document.getElementById('newEmpAllowCount').value = '0';
+      updateEmpSalaryScaleFields();
+    }
+
     function openAddEmpModal() {
+      resetEmployeeForm();
+      document.getElementById('add-emp-modal').style.display = 'flex';
+    }
+
+    function openEditEmpModal(empId) {
+      const emp = employeesData.find(e => e.id === empId);
+      if (!emp) return;
+      document.getElementById('employeeEditId').value = emp.id;
+      document.getElementById('newEmpName').value = emp.name || '';
+      document.getElementById('newEmpFinNo').value = emp.financialNo || '';
+      document.getElementById('newEmpNatNo').value = emp.nationalNo || '';
+      document.getElementById('newEmpBank').value = emp.bank || '';
+      document.getElementById('newEmpBranch').value = emp.branch || '';
+      document.getElementById('newEmpAcc').value = emp.accountNo || '';
+      document.getElementById('newEmpAllowMonth').value = String(emp.allowanceMonth || 0);
+      document.getElementById('newEmpAllowCount').value = String(Math.max(0, Math.min(10, emp.allowanceCount || 0)));
+      document.getElementById('newEmpGrade').value = String(emp.grade || 10);
+      updateEmpSalaryScaleFields();
+      document.getElementById('addEmpModalTitle').innerHTML = '<i class="fa-solid fa-user-pen"></i> تعديل بيانات الموظف';
+      const saveBtn = document.getElementById('employeeSaveBtn');
+      if (saveBtn) saveBtn.textContent = 'حفظ التعديلات';
       document.getElementById('add-emp-modal').style.display = 'flex';
     }
 
@@ -3745,52 +3993,86 @@
       document.getElementById('add-emp-modal').style.display = 'none';
     }
 
-    function saveNewEmployee(e) {
+    async function saveNewEmployee(e) {
       e.preventDefault();
-      const basic = parseFloat(document.getElementById('newEmpBasic').value) || 0;
-      const pension = basic * 0.05125;
-      const solidarity = basic * 0.01;
-      const deduct = pension + solidarity;
-      const net = basic - deduct;
+      const grade = parseInt(document.getElementById('newEmpGrade').value, 10) || 10;
+      const allowanceCount = parseInt(document.getElementById('newEmpAllowCount').value, 10) || 0;
+      const scale = getScaleSalary(grade, allowanceCount);
+      const editId = document.getElementById('employeeEditId').value.trim();
+      const oldEmp = editId ? employeesData.find(emp => emp.id === editId) : null;
+      const acc = document.getElementById('newEmpAcc').value.trim();
 
-      const newEmp = {
-        id: 'emp_' + Date.now(),
+      const employeePayload = {
+        id: editId || ('emp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)),
         name: document.getElementById('newEmpName').value.trim(),
         financialNo: document.getElementById('newEmpFinNo').value.trim(),
         nationalNo: document.getElementById('newEmpNatNo').value.trim(),
         bank: document.getElementById('newEmpBank').value.trim(),
         branch: document.getElementById('newEmpBranch').value.trim(),
-        accountNo: document.getElementById('newEmpAcc').value.trim(),
-        iban: 'LY33005' + document.getElementById('newEmpAcc').value.trim(),
-        grade: parseInt(document.getElementById('newEmpGrade').value, 10) || 10,
-        allowanceCount: parseInt(document.getElementById('newEmpAllowCount')?.value, 10) || 0,
+        accountNo: acc,
+        iban: oldEmp?.iban || ('LY33005' + acc),
+        grade,
+        allowanceCount,
         allowanceMonth: parseInt(document.getElementById('newEmpAllowMonth')?.value, 10) || 0,
-        allowanceYear: new Date().getFullYear(),
-        basicSalary: basic,
-        teachingAllowance: 0,
-        otherAllowance1: 0,
-        otherAllowance2: 0,
-        otherAllowance3: 0,
-        grossSalary: basic,
-        pensionDeduct: pension,
-        solidarityDeduct: solidarity,
-        medicalDeduct: 0,
-        absenceDeduct: 0,
-        otherDeductions: 0,
-        totalDeductions: deduct,
-        netSalary: net,
-        transferredTo: 'الضمان الاجتماعي',
-        lastPaymentDate: '30/06/2026',
-        monthlyData: {}
+        allowanceYear: oldEmp?.allowanceYear || new Date().getFullYear(),
+        basicSalary: scale.basic,
+        teachingAllowance: oldEmp?.teachingAllowance || 0,
+        otherAllowance1: oldEmp?.otherAllowance1 || 0,
+        otherAllowance2: oldEmp?.otherAllowance2 || 0,
+        otherAllowance3: oldEmp?.otherAllowance3 || 0,
+        grossSalary: scale.basic + (oldEmp?.teachingAllowance || 0) + (oldEmp?.otherAllowance1 || 0) + (oldEmp?.otherAllowance2 || 0) + (oldEmp?.otherAllowance3 || 0),
+        pensionDeduct: scale.pension,
+        solidarityDeduct: scale.solidarity,
+        medicalDeduct: oldEmp?.medicalDeduct || 0,
+        absenceDeduct: oldEmp?.absenceDeduct || 0,
+        otherDeductions: oldEmp?.otherDeductions || 0,
+        totalDeductions: scale.totalDeductions + (oldEmp?.medicalDeduct || 0) + (oldEmp?.absenceDeduct || 0) + (oldEmp?.otherDeductions || 0),
+        netSalary: scale.basic + (oldEmp?.teachingAllowance || 0) + (oldEmp?.otherAllowance1 || 0) + (oldEmp?.otherAllowance2 || 0) + (oldEmp?.otherAllowance3 || 0) - (scale.totalDeductions + (oldEmp?.medicalDeduct || 0) + (oldEmp?.absenceDeduct || 0) + (oldEmp?.otherDeductions || 0)),
+        transferredTo: oldEmp?.transferredTo || 'الضمان الاجتماعي',
+        lastPaymentDate: oldEmp?.lastPaymentDate || '30/06/2026',
+        monthlyData: oldEmp?.monthlyData || {}
       };
 
-      employeesData.unshift(newEmp);
-      saveEmployeesToStorage();
+      if (oldEmp) {
+        const idx = employeesData.findIndex(emp => emp.id === editId);
+        if (idx >= 0) employeesData[idx] = employeePayload;
+        else employeesData.unshift(employeePayload);
+      } else {
+        employeesData.unshift(employeePayload);
+      }
+
+      repairEmployeesData();
+      try { await saveSingleEmployeeToStorage(employeePayload); } catch (err) {
+        console.error(err);
+        alert('تعذر حفظ البيانات في قاعدة التخزين. لم يتم إغلاق النافذة حتى لا تفقد التعديل.');
+        return;
+      }
       renderEmployeesTable();
       populateEmployeeSelects();
       renderAllowanceList();
+      updateDashboardCalculations();
       closeAddEmpModal();
-      alert('تمت إضافة الموظف بنجاح!');
+      alert(oldEmp ? 'تم تعديل بيانات الموظف وحفظها بنجاح.' : 'تمت إضافة الموظف وحفظه بنجاح.');
+    }
+
+    async function deleteEmployee(empId) {
+      const emp = employeesData.find(e => e.id === empId);
+      if (!emp) return;
+      const ok = confirm(`هل أنت متأكد من حذف الموظف:\n${emp.name || ''}\nالرقم المالي: ${emp.financialNo || ''}\n\nسيتم حذف السجل نهائياً من قاعدة البيانات.`);
+      if (!ok) return;
+      try {
+        if (financeDB) await idbDeleteEmployee(empId);
+        else localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData.filter(e => e.id !== empId)));
+        employeesData = employeesData.filter(e => e.id !== empId);
+        renderEmployeesTable();
+        populateEmployeeSelects();
+        renderAllowanceList();
+        updateDashboardCalculations();
+        alert('تم حذف الموظف بنجاح.');
+      } catch (err) {
+        console.error(err);
+        alert('تعذر حذف الموظف من قاعدة البيانات، لذلك لم تُحذف النسخة الموجودة في الواجهة.');
+      }
     }
 
     function updateDashboardCalculations() {
