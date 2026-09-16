@@ -1619,6 +1619,17 @@
                 </button>
               </div>
 
+              <div style="border:1px solid #fde68a; border-radius:14px; padding:26px; text-align:center; background:#fffbeb;">
+                <i class="fa-solid fa-calendar-xmark" style="font-size:3rem; color:#b45309; margin-bottom:12px;"></i>
+                <h3 style="color:#92400e;">حذف شهر مالي محدد</h3>
+                <p style="color:var(--text-muted); font-size:0.88rem; margin:8px 0 16px;">
+                  حذف السجلات المالية لشهر وسنة تختارهما فقط، مع الإبقاء على الموظفين وبقية الأشهر كما هي.
+                </p>
+                <button class="btn" style="padding:12px 24px; font-size:1rem; background:#b45309; color:#fff;" onclick="openDeleteMonthlyPeriodModal()">
+                  <i class="fa-solid fa-calendar-minus"></i> حذف شهر / سنة
+                </button>
+              </div>
+
               <div style="border:1px solid #fecaca; border-radius:14px; padding:26px; text-align:center; background:#fff7f7;">
                 <i class="fa-solid fa-triangle-exclamation" style="font-size:3rem; color:var(--danger); margin-bottom:12px;"></i>
                 <h3 style="color:#991b1b;">تصفير المنظومة بالكامل</h3>
@@ -2220,6 +2231,25 @@
       </div>
       <div id="excelImportPeriodStatus" style="margin-top:4px; padding:10px 12px; border-radius:8px; background:#f8fafc; border:1px solid var(--border-color); font-size:0.84rem; font-weight:700; color:var(--text-muted);">سيتم استيراد الملف إلى فترة: سبتمبر 2026</div>
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;"><button type="button" class="btn btn-secondary" onclick="closeExcelImportModal()">إلغاء</button><button type="button" class="btn btn-success" onclick="startExcelImport()"><i class="fa-solid fa-file-arrow-up"></i> اختيار ملف Excel واستيراده</button></div>
+    </div>
+  </div>
+
+  <!-- نافذة حذف شهر مالي محدد -->
+  <div id="delete-monthly-period-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:560px; margin-top:7vh;">
+      <div class="panel-header" style="margin-bottom:16px;">
+        <div class="panel-title"><i class="fa-solid fa-calendar-minus"></i> حذف شهر مالي محدد</div>
+        <button type="button" class="btn btn-secondary" style="padding:6px 10px;" onclick="closeDeleteMonthlyPeriodModal()" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:12px 14px; margin-bottom:16px; font-size:0.88rem; line-height:1.8;">
+        <strong style="color:#9a3412;"><i class="fa-solid fa-triangle-exclamation"></i> تنبيه:</strong> سيتم حذف البيانات المالية للفترة المختارة فقط. لن يتم حذف اسم الموظف أو رقمه الوطني أو رقمه المالي، ولن تتأثر الأشهر الأخرى.
+      </div>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:14px;">
+        <div class="form-group"><label class="form-label">السنة *</label><div class="input-wrapper"><select id="deletePeriodYear" required><option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option><option value="2028">2028</option></select><i class="fa-solid fa-calendar-check input-icon-right"></i></div></div>
+        <div class="form-group"><label class="form-label">الشهر *</label><div class="input-wrapper"><select id="deletePeriodMonth" required><option value="1">يناير (1)</option><option value="2">فبراير (2)</option><option value="3">مارس (3)</option><option value="4">أبريل (4)</option><option value="5">مايو (5)</option><option value="6">يونيو (6)</option><option value="7">يوليو (7)</option><option value="8">أغسطس (8)</option><option value="9" selected>سبتمبر (9)</option><option value="10">أكتوبر (10)</option><option value="11">نوفمبر (11)</option><option value="12">ديسمبر (12)</option></select><i class="fa-solid fa-calendar-days input-icon-right"></i></div></div>
+      </div>
+      <div id="deleteMonthlyPeriodStatus" style="margin-top:4px; padding:10px 12px; border-radius:8px; background:#f8fafc; border:1px solid var(--border-color); font-size:0.84rem; font-weight:700; color:var(--text-muted);"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;"><button type="button" class="btn btn-secondary" onclick="closeDeleteMonthlyPeriodModal()">إلغاء</button><button type="button" class="btn btn-danger" onclick="deleteSelectedMonthlyPeriod()"><i class="fa-solid fa-trash-can"></i> حذف الفترة المختارة</button></div>
     </div>
   </div>
 
@@ -3519,6 +3549,44 @@
       ['basicSalary','teachingAllowance','otherAllowance1','otherAllowance2','otherAllowance3','grossSalary','pensionDeduct','solidarityDeduct','medicalDeduct','absenceDeduct','otherDeductions','totalDeductions','netSalary'].forEach(k=>{emp[k]=Number(r[k])||0;});
       if(r.transferredTo)emp.transferredTo=r.transferredTo; if(r.lastPaymentDate)emp.lastPaymentDate=r.lastPaymentDate;
     }
+    function updateDeleteMonthlyPeriodStatus(){
+      const y=Number(document.getElementById('deletePeriodYear')?.value)||2026, m=Number(document.getElementById('deletePeriodMonth')?.value)||9, key=`${y}-${m}`;
+      const count=(employeesData||[]).reduce((n,emp)=>n+(emp?.monthlyData?.[key]?1:0),0);
+      const el=document.getElementById('deleteMonthlyPeriodStatus'); if(!el)return;
+      el.innerHTML=count?`<span style="color:#b45309;"><i class="fa-solid fa-circle-exclamation"></i> توجد سجلات مالية للفترة ${EXCEL_IMPORT_MONTH_NAMES[m]} ${y} لدى ${count.toLocaleString('en-US')} موظف/موظفين.</span>`:`<span style="color:#047857;"><i class="fa-solid fa-circle-check"></i> لا توجد سجلات مالية مسجلة للفترة ${EXCEL_IMPORT_MONTH_NAMES[m]} ${y}.</span>`;
+    }
+    document.addEventListener('change',ev=>{if(ev.target?.id==='deletePeriodYear'||ev.target?.id==='deletePeriodMonth')updateDeleteMonthlyPeriodStatus();});
+    function openDeleteMonthlyPeriodModal(){
+      const modal=document.getElementById('delete-monthly-period-modal'); if(!modal)return;
+      updateDeleteMonthlyPeriodStatus(); modal.style.display='flex';
+    }
+    function closeDeleteMonthlyPeriodModal(){const modal=document.getElementById('delete-monthly-period-modal'); if(modal)modal.style.display='none';}
+    async function deleteSelectedMonthlyPeriod(){
+      const year=Number(document.getElementById('deletePeriodYear')?.value), month=Number(document.getElementById('deletePeriodMonth')?.value);
+      if(!year||month<1||month>12){alert('يرجى اختيار السنة والشهر بشكل صحيح.');return;}
+      const key=`${year}-${month}`, label=`${EXCEL_IMPORT_MONTH_NAMES[month]} ${year}`;
+      const count=(employeesData||[]).reduce((n,emp)=>n+(emp?.monthlyData?.[key]?1:0),0);
+      if(!count){alert(`لا توجد بيانات مالية مسجلة للفترة ${label}.`);updateDeleteMonthlyPeriodStatus();return;}
+      if(!confirm(`تحذير!\n\nسيتم حذف البيانات المالية للفترة ${label} فقط من جميع الموظفين (${count.toLocaleString('en-US')} سجل).\n\nسيبقى اسم الموظف والرقم الوطني والرقم المالي وبقية الأشهر كما هي.\n\nهل تريد المتابعة؟`))return;
+      try{
+        employeesData=(employeesData||[]).map(emp=>{
+          const copy=emp;
+          if(copy.monthlyData&&Object.prototype.hasOwnProperty.call(copy.monthlyData,key))delete copy.monthlyData[key];
+          const latest=getLatestMonthlyKey(copy);
+          if(latest){const rec=copy.monthlyData[latest]; if(rec)applyMonthlyRecordAsCurrent(copy,rec);}
+          else{
+            ['basicSalary','teachingAllowance','otherAllowance1','otherAllowance2','otherAllowance3','grossSalary','pensionDeduct','solidarityDeduct','medicalDeduct','absenceDeduct','otherDeductions','totalDeductions','netSalary'].forEach(k=>copy[k]=0);
+          }
+          return copy;
+        });
+        repairEmployeesData();
+        saveEmployeesToStorage();
+        try{empCurrentPage=1;renderEmployeesTable();populateEmployeeSelects();renderAllowanceList();updateDashboardCalculations();onCertMonthYearChange();updateSalaryCertSheet();updateLastPayCertSheet();}catch(uiErr){console.error('خطأ في تحديث الواجهة بعد حذف الفترة:',uiErr);}
+        closeDeleteMonthlyPeriodModal();
+        alert(`تم حذف السجلات المالية للفترة ${label} فقط بنجاح.\n\nلم يتم حذف أي موظف أو رقم وطني أو رقم مالي، ولم تتأثر بقية الأشهر.`);
+      }catch(err){console.error(err);alert('تعذر حذف الفترة المحددة ولم يتم إكمال العملية.\n\n'+(err?.message||err));}
+    }
+
     function startExcelImport(){
       const year=Number(document.getElementById('excelImportYear')?.value),month=Number(document.getElementById('excelImportMonth')?.value);
       if(!year||month<1||month>12){alert('يرجى اختيار السنة والشهر بشكل صحيح قبل اختيار ملف Excel.');return;}
@@ -3537,10 +3605,12 @@
           let importedRows=0,newEmployees=0,replacedRows=0,skippedRows=0; const conflicts=[];
           const seenFileFinancial = new Map();
           const seenFileNational = new Map();
-          workbook.SheetNames.forEach(sheetName=>{
-            const rows=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,defval:''}); if(!rows||rows.length<2)return;
-            let headerIdx=-1; for(let i=0;i<Math.min(rows.length,15);i++){const str=(rows[i]||[]).map(v=>String(v??'')).join(' ').toLowerCase(); if((str.includes('رقم')&&str.includes('مالي'))||str.includes('الاسم')||str.includes('المرتب الأساسي')||str.includes('اساسي')){headerIdx=i;break;}} if(headerIdx<0)headerIdx=0;
-            const colMap=resolveColumnsAccurate(rows[headerIdx]);
+          const sheetName = workbook.SheetNames?.[0];
+          if(!sheetName) throw new Error('ملف Excel لا يحتوي على أي ورقة عمل.');
+          const rows=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,defval:''});
+          if(!rows||rows.length<2) throw new Error(`الورقة الأولى «${sheetName}» لا تحتوي على بيانات كافية للاستيراد.`);
+          let headerIdx=-1; for(let i=0;i<Math.min(rows.length,15);i++){const str=(rows[i]||[]).map(v=>String(v??'')).join(' ').toLowerCase(); if((str.includes('رقم')&&str.includes('مالي'))||str.includes('الاسم')||str.includes('المرتب الأساسي')||str.includes('اساسي')){headerIdx=i;break;}} if(headerIdx<0)headerIdx=0;
+          const colMap=resolveColumnsAccurate(rows[headerIdx]);
             if(colMap.finNo===undefined||colMap.natNo===undefined||colMap.name===undefined)throw new Error(`تعذر التعرف على خانات الهوية في الورقة «${sheetName}». يجب وجود: الرقم المالي، الرقم الوطني، الاسم.`);
             for(let r=headerIdx+1;r<rows.length;r++){
               const parsed=parseExcelRowData(colMap,rows[r]||[]), fin=normalizeIdentityValue(parsed.finNo),nat=normalizeIdentityValue(parsed.natNo),name=normalizeIdentityValue(parsed.name);
@@ -3573,7 +3643,7 @@
               const rec=normalizeSalaryRecord({grade:parsed.grade||emp.grade||10,allowanceCount:parsed.allowCount||0,allowanceMonth:parsed.allowMonth||0,allowanceYear:parsed.allowYear||0,basicSalary:parsed.basic,teachingAllowance:parsed.teaching,otherAllowance1:parsed.otherAllow1,otherAllowance2:parsed.otherAllow2,otherAllowance3:0,grossSalary:parsed.gross,pensionDeduct:parsed.pension,solidarityDeduct:parsed.solidarity,medicalDeduct:parsed.medical,absenceDeduct:parsed.absenceDeduct,otherDeductions:parsed.otherDeductions,totalDeductions:parsed.totalDeductions,netSalary:parsed.net,transferredTo:parsed.transferTo||emp.transferredTo||'الضمان الاجتماعي',lastPaymentDate:parsed.lastPaymentDate||emp.lastPaymentDate||'30/06/2026'},emp);
               emp.monthlyData[period.key]=rec; importedRows++; if(old)replacedRows++; if(shouldBecomeCurrentPeriod(emp,period.key))applyMonthlyRecordAsCurrent(emp,rec);
             }
-          });
+          
           if(conflicts.length)throw new Error('تم إيقاف الاستيراد بالكامل لحماية البيانات. توجد تعارضات في هوية موظفين داخل الملف:\n\n'+conflicts.slice(0,8).join('\n')+(conflicts.length>8?`\n... ويوجد ${conflicts.length-8} تعارضات أخرى.`:''));
           if(!importedRows)throw new Error('لم يتم العثور على صفوف موظفين صالحة للاستيراد. لم يتم تغيير أي بيانات.');
           employeesData=workingEmployees; repairEmployeesData(); saveEmployeesToStorage();
