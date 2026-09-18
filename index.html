@@ -967,7 +967,7 @@
         <div class="form-group">
           <label class="form-label">كلمة المرور</label>
           <div class="input-wrapper">
-            <input type="password" id="loginPass" required value="123456">
+            <input type="password" id="loginPass" required autocomplete="current-password" placeholder="اكتب كلمة المرور">
             <i class="fa-solid fa-lock input-icon-right"></i>
           </div>
         </div>
@@ -1014,17 +1014,33 @@
         <i class="fa-solid fa-award"></i>
         <span>كشف المستحقين للعلاوة</span>
       </a>
+      <a class="nav-item" onclick="switchNav('annual-salary')">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>كشف مرتب السنة كاملة</span>
+      </a>
       <a class="nav-item" onclick="switchNav('excel-sync')">
         <i class="fa-solid fa-file-excel"></i>
-        <span>استيراد وتصدير Excel</span>
+        <span>استيراد وتصدير Excel <i class="fa-solid fa-lock" style="font-size:.7rem; margin-right:5px;"></i></span>
       </a>
       <a class="nav-item" onclick="switchNav('signatories')">
         <i class="fa-solid fa-signature"></i>
-        <span>إعداد التوقيعات الرسمية</span>
+        <span>إعداد التوقيعات الرسمية <i class="fa-solid fa-lock" style="font-size:.7rem; margin-right:5px;"></i></span>
       </a>
       <a class="nav-item" onclick="switchNav('profile')">
         <i class="fa-solid fa-id-badge"></i>
-        <span>الملف الشخصي</span>
+        <span>الملف الشخصي <i class="fa-solid fa-lock" style="font-size:.7rem; margin-right:5px;"></i></span>
+      </a>
+      <a class="nav-item" onclick="switchNav('user-management')">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>إدارة المستخدمين <i class="fa-solid fa-lock" style="font-size:.7rem; margin-right:5px;"></i></span>
+      </a>
+      <a class="nav-item" onclick="switchNav('operation-logs')">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>سجل العمليات <i class="fa-solid fa-lock" style="font-size:.7rem; margin-right:5px;"></i></span>
+      </a>
+      <a class="nav-item" onclick="switchNav('certificate-log')">
+        <i class="fa-solid fa-file-circle-check"></i>
+        <span>سجل الشهائد <i class="fa-solid fa-lock" style="font-size:.7rem; margin-right:5px;"></i></span>
       </a>
 
       <div class="sidebar-section-title">النظام</div>
@@ -1574,14 +1590,14 @@
                   <table class="allow-list-table">
                     <thead>
                       <tr>
-                        <th style="width:4%;">ت</th>
-                        <th style="width:11%;">الرقم المالي</th>
-                        <th style="width:26%;">الاسم رباعياً</th>
+                        <th style="width:6%;">ت</th>
+                        <th style="width:9%;">الرقم المالي</th>
+                        <th style="width:29%;">الاسم رباعياً</th>
                         <th style="width:6%;">الدرجة</th>
                         <th style="width:8%;">العلاوات الحالية</th>
                         <th style="width:8%;">العلاوة المستحقة</th>
-                        <th style="width:12%;">المرتب الأساسي</th>
-                        <th style="width:12%;">الإجمالي الشهري</th>
+                        <th style="width:10.5%;">المرتب الأساسي</th>
+                        <th style="width:10.5%;">الإجمالي الشهري</th>
                         <th style="width:13%;">تاريخ الاستحقاق</th>
                       </tr>
                     </thead>
@@ -1596,6 +1612,27 @@
                 <div class="doc-signatures-container allow-sig-row" id="allowSignatureContainer" style="margin-top:26px;"></div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div id="section-annual-salary" class="app-section">
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-calendar-days"></i> كشف مرتب السنة كاملة</div>
+              <div style="font-size:.78rem;color:var(--text-muted);">يعرض بيانات الأشهر المستوردة فقط.</div>
+            </div>
+            <div class="form-grid" style="align-items:end;">
+              <div class="form-group" style="grid-column:span 2;">
+                <label class="form-label">الموظف *</label>
+                <input type="text" id="annualEmpSearch" placeholder="بحث بالاسم أو الرقم المالي..." oninput="filterEmpOptions('annualEmpSelect', this.value)" style="width:100%;margin-bottom:6px;padding:9px 12px;border:1.5px solid var(--border-color);border-radius:8px;">
+                <div class="input-wrapper"><select id="annualEmpSelect" onchange="renderAnnualSalaryReport()"><option value="">-- اختر الموظف --</option></select></div>
+              </div>
+              <div class="form-group"><label class="form-label">السنة *</label><div class="input-wrapper"><select id="annualYearSelect" onchange="renderAnnualSalaryReport()"><option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option><option value="2028">2028</option><option value="2029">2029</option><option value="2030">2030</option></select><i class="fa-solid fa-calendar-check input-icon-right"></i></div></div>
+              <div class="form-group"><label class="form-label">الفرع قبل الطباعة *</label><div class="input-wrapper"><input type="text" id="annualBranchInput" value="" required placeholder="اكتب الفرع" oninput="renderAnnualSalaryReport()"></div></div>
+              <div class="form-group" style="grid-column:1 / -1;"><label class="form-label">إلى / الجهة الموجهة إليها</label><div class="input-wrapper"><input type="text" id="annualDestination" value="" placeholder="اكتب الجهة الموجهة إليها" oninput="renderAnnualSalaryReport()"></div></div>
+              <div><button class="btn btn-success" onclick="openAnnualSalaryReport()"><i class="fa-solid fa-eye"></i> عرض وطباعة الكشف</button></div>
+            </div>
+            <div id="annualSalaryInlineSummary" style="margin-top:16px;"></div>
           </div>
         </div>
 
@@ -1650,6 +1687,16 @@
                 <button class="btn btn-primary" style="padding:12px 24px;" onclick="exportToExcel()">
                   <i class="fa-solid fa-download"></i> تصدير البيانات إلى Excel
                 </button>
+              </div>
+              <div style="border:1px solid #c7d2fe; border-radius:14px; padding:26px; text-align:center; background:#eef2ff;">
+                <i class="fa-solid fa-shield-halved" style="font-size:3rem; color:#4338ca; margin-bottom:12px;"></i>
+                <h3 style="color:#3730a3;">النسخة الاحتياطية الكاملة</h3>
+                <p style="color:var(--text-muted); font-size:0.88rem; margin:8px 0 16px;">حفظ واستعادة كامل البيانات والإعدادات والسجلات.</p>
+                <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+                  <button class="btn btn-primary" style="padding:10px 16px;" onclick="exportFullBackup()"><i class="fa-solid fa-cloud-arrow-down"></i> تصدير نسخة احتياطية</button>
+                  <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="importFullBackup(event)">
+                  <button class="btn btn-secondary" style="padding:10px 16px;" onclick="document.getElementById('backupFileInput').click()"><i class="fa-solid fa-cloud-arrow-up"></i> استيراد نسخة احتياطية</button>
+                </div>
               </div>
             </div>
           </div>
@@ -1731,6 +1778,58 @@
               </button>
             </div>
           </div>
+        </div>
+
+        <div id="section-user-management" class="app-section">
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fa-solid fa-user-shield"></i> إدارة المستخدمين</div>
+              <button class="btn btn-primary" style="padding:7px 14px;" onclick="openUserManagerForm()"><i class="fa-solid fa-user-plus"></i> إضافة مستخدم</button>
+            </div>
+            <p style="font-size:.84rem;color:var(--text-muted);margin-bottom:16px;">هذا القسم محمي بكلمة السر 33733. لكل مستخدم كلمة سر مستقلة للدخول إلى المنظومة.</p>
+
+            <div id="userManagerForm" style="display:none;border:1.5px dashed var(--primary);border-radius:12px;padding:16px;background:#f8fafc;margin-bottom:18px;">
+              <h4 id="userManagerFormTitle" style="color:var(--primary);margin-bottom:12px;font-size:1rem;"><i class="fa-solid fa-user-plus"></i> إضافة مستخدم جديد</h4>
+              <input type="hidden" id="userManagerOriginalName" value="">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;align-items:end;">
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label">اسم المستخدم *</label>
+                  <div class="input-wrapper"><input type="text" id="userManagerName" autocomplete="off" placeholder="اكتب اسم المستخدم"></div>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label">كلمة السر *</label>
+                  <div class="input-wrapper"><input type="password" id="userManagerPassword" autocomplete="new-password" placeholder="كلمة السر الخاصة بالمستخدم"></div>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label">الصفة / الوظيفة (اختياري)</label>
+                  <div class="input-wrapper"><input type="text" id="userManagerTitle" autocomplete="off" placeholder="مثال: رئيس القسم المالي"></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;">
+                <button class="btn btn-secondary" type="button" onclick="closeUserManagerForm()">إلغاء</button>
+                <button class="btn btn-success" type="button" onclick="saveUserManagerUser()"><i class="fa-solid fa-floppy-disk"></i> حفظ المستخدم</button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead><tr><th>اسم المستخدم</th><th>الصفة</th><th>كلمة السر</th><th>إجراءات</th></tr></thead>
+                <tbody id="userManagerTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="section-operation-logs" class="app-section">
+          <div class="panel-card"><div class="panel-header"><div class="panel-title"><i class="fa-solid fa-clock-rotate-left"></i> سجل العمليات</div><button class="btn btn-secondary" style="padding:7px 12px;" onclick="renderOperationLogs()"><i class="fa-solid fa-arrows-rotate"></i> تحديث</button></div>
+          <div id="operationLogsStats" style="margin-bottom:14px;"></div>
+          <div class="table-container"><table class="data-table"><thead><tr><th>التاريخ والوقت</th><th>المستخدم</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody id="operationLogsBody"></tbody></table></div></div>
+        </div>
+
+        <div id="section-certificate-log" class="app-section">
+          <div class="panel-card"><div class="panel-header"><div class="panel-title"><i class="fa-solid fa-file-circle-check"></i> سجل الشهائد المسحوبة</div><button class="btn btn-secondary" style="padding:7px 12px;" onclick="renderCertificateLogs()"><i class="fa-solid fa-arrows-rotate"></i> تحديث</button></div>
+          <div id="certificateLogsStats" style="margin-bottom:14px;"></div>
+          <div class="table-container"><table class="data-table"><thead><tr><th>التاريخ والوقت</th><th>نوع الشهادة</th><th>الموظف</th><th>الرقم المالي</th><th>الرقم الوطني</th><th>الشهر / السنة</th><th>المستخدم</th></tr></thead><tbody id="certificateLogsBody"></tbody></table></div></div>
         </div>
       </main>
     </div>
@@ -2183,16 +2282,17 @@
           </table>
 
           <!-- شريط التنبيه الإداري للرصيد والإجازة المتبقية -->
-          <div class="cert1-net-bar" style="font-size: 14px; margin-bottom: 8px;">
+          <div class="cert1-net-bar" style="font-size: 12px; margin-bottom: 8px;">
             <div>يستحق إجازة سنوية حتى تاريخ نقله مقدارها: (<strong id="lpPrintLeaveDays">0</strong>) يوم عمل</div>
             <div>رصيد مال التقاعد الذي يجب تحويله: (<strong id="lpPrintPensionBalance">0</strong>) د.ل</div>
           </div>
 
           <!-- التعهد القانوني وخاتمة البراءة المالية بنفس سياق شهادة المرتب وبخط كبير -->
           <div class="cert1-closing-text">
-            <div>أعطيت له هذه الشهادة براءة لذمة مراقبة التربية والتعليم سلوق وتقديمها للجهة المختصة بالصرف</div>
-            <div>وعلى الجهة المنقول إليها عدم صرف مرتب المعني إلا بموجب هذه الشهادة الرسمية</div>
-            <div style="font-weight:bold; margin-top:3px;">و السلام عليكم و رحمة الله و بركاته</div>
+            <div>أعطيت له هذه الشهادة براءة لذمة مراقبة التربية والتعليم سلوق</div>
+            <div>وتقديمها للجهة المختصة بالصرف وعلى الجهة المنقول إليها عدم صرف</div>
+            <div>مرتب المعني إلا بموجب هذه الشهادة الرسمية</div>
+            <div style="font-weight:bold; margin-top:3px;">والسلام عليكم ورحمة الله وبركاته</div>
           </div>
         </div>
 
@@ -2250,6 +2350,75 @@
       </div>
       <div id="deleteMonthlyPeriodStatus" style="margin-top:4px; padding:10px 12px; border-radius:8px; background:#f8fafc; border:1px solid var(--border-color); font-size:0.84rem; font-weight:700; color:var(--text-muted);"></div>
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;"><button type="button" class="btn btn-secondary" onclick="closeDeleteMonthlyPeriodModal()">إلغاء</button><button type="button" class="btn btn-danger" onclick="deleteSelectedMonthlyPeriod()"><i class="fa-solid fa-trash-can"></i> حذف الفترة المختارة</button></div>
+    </div>
+  </div>
+
+  <div id="annual-salary-modal" class="modal-overlay">
+    <div style="width:100%;max-width:980px;margin:auto;">
+      <div class="modal-preview-toolbar">
+        <div class="toolbar-ctrl-item"><strong><i class="fa-solid fa-calendar-days"></i> كشف مرتب السنة كاملة</strong></div>
+        <div class="toolbar-ctrl-item"><label>الخط:</label><select id="modalAnnualFont" onchange="changeAnnualDocFont(this.value)">
+          <option value="'Cairo', sans-serif" selected>Cairo (القاهرة - معتمد)</option>
+          <option value="'Sultan Medium Local', 'Cairo', sans-serif">Sultan Medium (سلطان ميديا)</option>
+          <option value="'Mohannad Local', 'Cairo', sans-serif">Mohannad (مهند)</option>
+          <option value="'Amiri', serif">Amiri (أميري - كلاسيكي)</option>
+          <option value="'Tajawal', sans-serif">Tajawal (تجوال - متوازن)</option>
+          <option value="'Almarai', sans-serif">Almarai (المراعي - مميز)</option>
+          <option value="'Noto Naskh Arabic', serif">Noto Naskh (نسخ رسمي)</option>
+          <option value="'Noto Kufi Arabic', sans-serif">Noto Kufi (كوفي معاصر)</option>
+          <option value="'Lateef', cursive">Lateef (لطيف - تراثي)</option>
+        </select></div>
+        <div class="toolbar-ctrl-item"><label>حجم الخط:</label><select id="modalAnnualFontSize" onchange="changeAnnualDocFontSize(this.value)">
+          <option value="12.5px">صغير (12.5px)</option>
+          <option value="13.5px" selected>افتراضي (13.5px)</option>
+          <option value="15px">كبير (15px)</option>
+          <option value="17px">كبير جداً (17px)</option>
+          <option value="18.5px">ضخم (18.5px)</option>
+        </select></div>
+        <div class="toolbar-ctrl-item"><label>تمدد الجدول:</label><select id="modalAnnualRowHeight" onchange="changeAnnualTableRowHeight(this.value)">
+          <option value="compact">مضغوط</option>
+          <option value="normal" selected>عادي متوازن</option>
+          <option value="spacious">ممتد واسع</option>
+        </select></div>
+        <div class="toolbar-ctrl-item"><label>الموظف:</label><select id="annualModalEmp" onchange="document.getElementById('annualEmpSelect').value=this.value;renderAnnualSalaryReport();"></select></div>
+        <div class="toolbar-ctrl-item"><label>السنة:</label><select id="annualModalYear" onchange="document.getElementById('annualYearSelect').value=this.value;renderAnnualSalaryReport();"><option>2024</option><option>2025</option><option selected>2026</option><option>2027</option><option>2028</option><option>2029</option><option>2030</option></select></div>
+        <div class="toolbar-ctrl-item"><label><i class="fa-solid fa-signature"></i> التوقيع:</label><select id="annualSignatoryCount" onchange="renderAnnualSignatureBlock()">
+          <option value="1">توقيع واحد</option>
+          <option value="2" selected>توقيعان</option>
+        </select></div>
+        <div class="toolbar-ctrl-item"><label>الجهة:</label><select id="annualSignatorySelect" onchange="renderAnnualSignatureBlock()">
+          <option value="sig2" selected>رئيس القسم المالي</option>
+          <option value="sig1">مدير المكتب</option>
+        </select></div>
+        <div class="toolbar-ctrl-item"><label>الموقع:</label><select id="annualSignatoryPos" onchange="renderAnnualSignatureBlock()">
+          <option value="left" selected>يسار</option>
+          <option value="center">وسط</option>
+          <option value="right">يمين</option>
+        </select></div>
+        <div class="toolbar-ctrl-item"><label>الترتيب:</label><select id="annualSignatoryOrder" onchange="renderAnnualSignatureBlock()">
+          <option value="name_first" selected>الاسم في الأعلى والصفة بالأسفل</option>
+          <option value="title_first">الصفة في الأعلى والاسم بالأسفل</option>
+        </select></div>
+        <button class="btn btn-success" style="padding:6px 14px;" onclick="executeDirectPrint('annual')"><i class="fa-solid fa-print"></i> طباعة A4</button>
+        <button class="btn btn-secondary" style="padding:6px 12px;" onclick="closeAnnualSalaryModal()"><i class="fa-solid fa-xmark"></i> إغلاق</button>
+      </div>
+      <div class="printable-sheet" id="annual-salary-sheet" style="min-height:268mm;">
+        <div>
+          <div class="cert1-header">
+            <div class="cert1-header-right"><div>وزارة التربية و التعليم</div><div>مراقبة التربية و التعليم سلوق</div><div style="margin-top:4px;font-size:13.5px;">التـــــــــــاريخ : <span id="annualPrintDate">--</span></div><div style="font-size:13.5px;">الرقم المـــالي : <span id="annualPrintFinNo">--</span></div><div style="font-size:13.5px;">الرقم الوطني : <span id="annualPrintNatNo">--</span></div></div>
+            <div class="cert1-header-center"><img id="annualLogoImg" class="cert1-large-logo" alt="شعار المراقبة"></div>
+            <div class="cert1-header-left">الموضوع : كشف مرتب سنوي</div>
+          </div>
+          <hr class="cert1-divider">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:800;margin:6px 0 8px;width:100%;"><div style="text-align:right;">إلى / <span id="annualPrintDestination">--</span></div><div style="text-align:left;">بعد التحية</div></div>
+          <div style="text-align:center;font-size:18px;font-weight:900;margin:8px 0 14px;">كشف مرتب السنة <span id="annualPrintYear">2026</span>م</div>
+          <div class="cert1-emp-box" id="annualPrintEmpName">--</div>
+          <table class="cert1-bank-table"><thead><tr><th>المصرف</th><th>الفرع</th><th>رقم الحساب</th></tr></thead><tbody><tr><td id="annualPrintBank">--</td><td id="annualPrintBranch">--</td><td id="annualPrintAccount">--</td></tr></tbody></table>
+          <table class="cert1-salary-table" id="annualSalaryPrintTable" style="font-size:13.5px;"><thead><tr><th>الشهر</th><th>الدرجة</th><th>العلاوات</th><th>المرتب الأساسي</th><th>إجمالي المرتب</th><th>صافي المرتب</th></tr></thead><tbody id="annualSalaryTableBody"></tbody><tfoot><tr style="font-weight:900;background:#f1f5f9;"><td colspan="3">إجمالي السنة</td><td id="annualTotalBasic">0.000</td><td id="annualTotalGross">0.000</td><td id="annualTotalNet">0.000</td></tr></tfoot></table>
+          <div id="annualNoDataMsg" style="display:none;text-align:center;padding:14px;font-weight:900;">لا توجد بيانات مالية مستوردة لهذا الموظف في السنة المختارة.</div>
+        </div>
+        <div class="doc-signatures-container" style="justify-content:space-between;"><div id="annualSignatureContainer" style="display:flex;width:100%;justify-content:space-between;"></div></div>
+      </div>
     </div>
   </div>
 
@@ -2342,6 +2511,9 @@
     const STORAGE_USERS_KEY = 'suluq_finance_users_v8';
     const STORAGE_FONT_KEY = 'suluq_finance_font_v4';
     const STORAGE_LPTRIO_KEY = 'suluq_finance_lptrio_v1';
+    const STORAGE_AUTH_KEY = 'suluq_finance_auth_v1';
+    const STORAGE_OPERATION_LOG_KEY = 'suluq_finance_operation_logs_v1';
+    const STORAGE_CERT_LOG_KEY = 'suluq_finance_certificate_logs_v1';
 
     /* تخزين قوي للعمل دون إنترنت: IndexedDB هو المخزن الأساسي للموظفين،
        مع الإبقاء على localStorage كنسخة توافقية/ترحيل للبيانات القديمة. */
@@ -2503,10 +2675,48 @@
     };
 
     let usersConfig = {
-      'عبدالسلام سالم الجراري': { password: '123456', title: 'رئيس القسم المالي' },
-      'المهدي سعد عبدالواحد': { password: '123456', title: 'مدير مكتب الشؤون الإدارية والمالية' }
+      'عبدالسلام سالم الجراري': { title: 'رئيس القسم المالي' },
+      'المهدي سعد عبدالواحد': { title: 'مدير مكتب الشؤون الإدارية والمالية' }
     };
     let currentUser = null;
+    let protectedAccessGranted = false;
+    const PROTECTED_PASSWORD = '33733';
+    const PROTECTED_SECTIONS = new Set(['excel-sync','signatories','profile','user-management','operation-logs','certificate-log']);
+    let operationLogs = [];
+    let certificateLogs = [];
+
+    function escapeHtml(v){ return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function safeParseLocalStorage(key, fallback){ try{ const raw=localStorage.getItem(key); return raw?JSON.parse(raw):fallback; }catch(e){ return fallback; } }
+    function saveJsonStorage(key,value){ try{ localStorage.setItem(key,JSON.stringify(value)); return true; }catch(e){ console.warn('تعذر الحفظ:',key,e); return false; } }
+    function logOperation(action,details='',userOverride=null){ try{ const entry={id:'op_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),at:new Date().toISOString(),user:userOverride||currentUser||'غير مسجل',action:String(action||''),details:String(details||'')}; operationLogs=[entry,...(Array.isArray(operationLogs)?operationLogs:[])].slice(0,5000); saveJsonStorage(STORAGE_OPERATION_LOG_KEY,operationLogs); }catch(e){} }
+    function logCertificateIssued(type){ try{ let emp=null,month='',year=''; if(type==='salary'){emp=employeesData.find(x=>x.id===document.getElementById('certEmpSelect')?.value);month=document.getElementById('certMonth')?.value||'';year=document.getElementById('certYear')?.value||'';} else {emp=employeesData.find(x=>x.id===document.getElementById('lastPayEmpSelect')?.value);month=document.getElementById('lastPayMonth')?.value||'';year=document.getElementById('lastPayYear')?.value||'';} if(!emp)return; const entry={id:'cert_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),at:new Date().toISOString(),type:type==='salary'?'شهادة مرتب':'شهادة الدفع الأخير',employeeName:emp.name||'',financialNo:emp.financialNo||'',nationalNo:emp.nationalNo||'',month,year,user:currentUser||'غير مسجل'}; certificateLogs=[entry,...(Array.isArray(certificateLogs)?certificateLogs:[])].slice(0,10000); saveJsonStorage(STORAGE_CERT_LOG_KEY,certificateLogs); logOperation('سحب / طباعة شهادة',`${entry.type} — ${entry.employeeName} — ${month} ${year}`); }catch(e){} }
+    function formatLogDate(v){ return new Date(v).toLocaleString('ar-LY',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+    function renderOperationLogs(){ const b=document.getElementById('operationLogsBody'),st=document.getElementById('operationLogsStats'); if(!b)return; const list=Array.isArray(operationLogs)?operationLogs:[]; b.innerHTML=list.length?list.map(x=>`<tr><td>${formatLogDate(x.at)}</td><td>${escapeHtml(x.user)}</td><td style="font-weight:800;">${escapeHtml(x.action)}</td><td style="white-space:normal;min-width:320px;">${escapeHtml(x.details)}</td></tr>`).join(''):`<tr><td colspan="4" style="text-align:center;padding:20px;font-weight:800;">لا توجد عمليات مسجلة بعد.</td></tr>`; if(st)st.innerHTML=`<div style="display:inline-flex;padding:10px 14px;border-radius:10px;background:#eff6ff;border:1px solid #bfdbfe;font-weight:800;">إجمالي العمليات: ${list.length.toLocaleString('ar-LY')}</div>`; }
+    function renderCertificateLogs(){ const b=document.getElementById('certificateLogsBody'),st=document.getElementById('certificateLogsStats'); if(!b)return; const list=Array.isArray(certificateLogs)?certificateLogs:[]; b.innerHTML=list.length?list.map(x=>`<tr><td>${formatLogDate(x.at)}</td><td>${escapeHtml(x.type)}</td><td>${escapeHtml(x.employeeName)}</td><td>${escapeHtml(x.financialNo)}</td><td>${escapeHtml(x.nationalNo)}</td><td>${escapeHtml((x.month||'')+' '+(x.year||''))}</td><td>${escapeHtml(x.user)}</td></tr>`).join(''):`<tr><td colspan="7" style="text-align:center;padding:20px;font-weight:800;">لا توجد شهادات مسجلة بعد.</td></tr>`; if(st)st.innerHTML=`<div style="display:inline-flex;padding:10px 14px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0;font-weight:800;">إجمالي الشهائد: ${list.length.toLocaleString('ar-LY')}</div>`; }
+    function requireProtectedAccess(){ if(protectedAccessGranted)return true; const p=prompt('هذا القسم محمي. أدخل كلمة السر:'); if(p===null)return false; if(p!==PROTECTED_PASSWORD){alert('كلمة السر غير صحيحة.');logOperation('محاولة دخول لقسم محمي','تم رفض الوصول.');return false;} protectedAccessGranted=true; logOperation('فتح الأقسام المحمية','تم فتح الأقسام المحمية في هذه الجلسة.');return true; }
+    async function sha256Hex(text){ if(!crypto?.subtle)throw new Error('التشفير المحلي غير متاح.'); const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(text))); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+    function getAuthState(){ return safeParseLocalStorage(STORAGE_AUTH_KEY,null); }
+    function stripUserPasswords(){ Object.values(usersConfig||{}).forEach(u=>{if(u&&typeof u==='object')delete u.password;}); }
+    async function migrateLegacyLoginPassword(savedUsers){
+      const current=getAuthState();
+      let legacyPassword='';
+      if(savedUsers&&typeof savedUsers==='object')for(const u of Object.values(savedUsers)){if(u?.password){legacyPassword=String(u.password);break;}}
+      if(!current?.hash && legacyPassword){
+        try{saveJsonStorage(STORAGE_AUTH_KEY,{scheme:'SHA-256',hash:await sha256Hex(legacyPassword),setAt:new Date().toISOString()});}catch(e){}
+      }
+    }
+    async function migrateUsersToIndividualPasswords(){
+      const auth=getAuthState();
+      if(!auth?.hash) return;
+      let changed=false;
+      for(const u of Object.values(usersConfig||{})){
+        if(u && typeof u==='object' && !u.passwordHash){
+          u.passwordHash=auth.hash;
+          changed=true;
+        }
+      }
+      if(changed) saveJsonStorage(STORAGE_USERS_KEY,usersConfig);
+    }
 
     let empCurrentPage = 1;
     const empPageSize = 10;
@@ -2514,15 +2724,22 @@
     let salaryPieChart = null;
     let lastCertBranchEmpId = null;
     let lastPayBranchEmpId = null;
+    let annualBranchEmpId = null;
 
     window.addEventListener('DOMContentLoaded', async () => {
       loadSavedLogo();
       loadLastPayTrio();
       loadSavedFont();
+      operationLogs = safeParseLocalStorage(STORAGE_OPERATION_LOG_KEY, []);
+      certificateLogs = safeParseLocalStorage(STORAGE_CERT_LOG_KEY, []);
       await loadStoredData();
+      renderOperationLogs();
+      renderCertificateLogs();
+      renderUserManagementTable();
       updateEmpSalaryScaleFields();
       renderEmployeesTable();
       populateEmployeeSelects();
+      populateAnnualEmployeeSelect();
       updateDashboardCalculations();
       updateSalaryCertSheet();
       updateLastPayCertSheet();
@@ -2534,6 +2751,7 @@
     /* دالة تغيير حجم الخط العام في الشهادات */
     function changeDocFontSize(fontSize) {
       document.documentElement.style.setProperty('--doc-base-font-size', fontSize);
+      logOperation('تغيير حجم خط الشهادة', `الحجم: ${fontSize}`);
       const sheets = document.querySelectorAll('.printable-sheet');
       sheets.forEach(sheet => {
         sheet.style.fontSize = fontSize;
@@ -2544,6 +2762,7 @@
 
     /* دالة تغيير ارتفاع خلايا الجداول */
     function changeTableRowHeight(mode) {
+      logOperation('تغيير ارتفاع صفوف الجداول', `الوضع: ${mode}`);
       let pad = '5px 8px';
       if (mode === 'compact') pad = '3px 6px';
       if (mode === 'spacious') pad = '7px 10px';
@@ -2560,6 +2779,7 @@
 
     /* دالة تغيير وتثبيت الخط فورياً لكافة عناصر النماذج */
     function changeDocFont(fontFamily) {
+      logOperation('تغيير خط الشهادة', `الخط: ${fontFamily}`);
       document.documentElement.style.setProperty('--doc-font-family', fontFamily);
       const sheets = document.querySelectorAll('.printable-sheet');
       sheets.forEach(sheet => {
@@ -2598,6 +2818,7 @@
       reader.onload = function(evt) {
         const base64 = evt.target.result;
         try { localStorage.setItem(STORAGE_LOGO_KEY, base64); } catch(err){}
+      logOperation('تغيير الشعار','تم رفع شعار مخصص للمنظومة.');
         applyLogoEverywhere(base64);
         alert('تم حفظ وتكبير الشعار بنجاح لكافة الشهادات والكشوفات!');
       };
@@ -2607,6 +2828,7 @@
     /* استعادة الشعار الرسمي المدمج داخل الكود */
     function restoreDefaultLogo() {
       try { localStorage.removeItem(STORAGE_LOGO_KEY); } catch(e){}
+      logOperation('استعادة الشعار الرسمي','تمت استعادة الشعار الرسمي.');
       applyLogoEverywhere(DEFAULT_LOGO);
       alert('تمت استعادة الشعار الرسمي المدمج بنجاح.');
     }
@@ -2663,26 +2885,58 @@
         console.warn('تعذر استخدام IndexedDB؛ سيتم الرجوع إلى التخزين المحلي:', dbErr);
       }
 
+      /*
+       * الاستعادة الآمنة:
+       * 1) نستخدم IndexedDB عندما تحتوي على بيانات.
+       * 2) إذا كانت فارغة/غير متاحة نستخدم localStorage.
+       * 3) نزامن النسخة الأخرى بعد الاستعادة.
+       */
       if (!loadedFromDB) {
         const savedEmps = localStorage.getItem(STORAGE_EMP_KEY);
         if (savedEmps) {
-          try { employeesData = JSON.parse(savedEmps); } catch(e) { console.warn('تعذر قراءة بيانات الموظفين القديمة:', e); }
+          try {
+            const parsed = JSON.parse(savedEmps);
+            if (Array.isArray(parsed)) employeesData = parsed;
+          } catch(e) {
+            console.warn('تعذر قراءة بيانات الموظفين المحلية:', e);
+          }
         }
+
         if (financeDB && employeesData && employeesData.length) {
-          try { await idbReplaceAllEmployees(employeesData); } catch (e) { console.warn('فشل ترحيل بيانات الموظفين إلى IndexedDB:', e); }
+          try {
+            await idbReplaceAllEmployees(employeesData);
+            loadedFromDB = true;
+          } catch (e) {
+            console.warn('فشل ترحيل بيانات الموظفين إلى IndexedDB:', e);
+          }
         }
       }
 
       repairEmployeesData();
+
+      /* مزامنة النسخة المحلية بعد الاستعادة من IndexedDB. */
+      if (employeesData && employeesData.length) {
+        try {
+          localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData));
+        } catch (e) {
+          console.warn('تعذر تحديث النسخة المحلية بعد الاستعادة:', e);
+        }
+      }
 
       const savedSigs = localStorage.getItem(STORAGE_SIG_KEY);
       if (savedSigs) {
         try { signatoriesConfig = Object.assign(signatoriesConfig, JSON.parse(savedSigs)); } catch(e){}
       }
       const savedUsers = localStorage.getItem(STORAGE_USERS_KEY);
+      let parsedSavedUsers = null;
       if (savedUsers) {
-        try { usersConfig = Object.assign(usersConfig, JSON.parse(savedUsers)); } catch(e){}
+        try { parsedSavedUsers = JSON.parse(savedUsers); usersConfig = Object.assign(usersConfig, parsedSavedUsers); } catch(e){}
       }
+      await migrateLegacyLoginPassword(parsedSavedUsers);
+      await migrateUsersToIndividualPasswords();
+      stripUserPasswords();
+      saveJsonStorage(STORAGE_USERS_KEY, usersConfig);
+      populateLoginUsers();
 
       document.getElementById('sigName1').value = signatoriesConfig.sig1.name;
       document.getElementById('sigTitle1').value = signatoriesConfig.sig1.title;
@@ -2690,48 +2944,157 @@
       document.getElementById('sigTitle2').value = signatoriesConfig.sig2.title;
     }
 
+    /*
+     * حفظ دائم ومزدوج لسجل الموظفين:
+     * localStorage = نسخة فورية/توافقية.
+     * IndexedDB   = المخزن الأساسي للبيانات الكبيرة.
+     * نحفظ في الاثنين دائماً حتى لا تختفي البيانات عند تحديث الصفحة.
+     */
     function saveEmployeesToStorage() {
-      /* IndexedDB هو المصدر الأساسي؛ عملية المعاملة تدعم أحجام بيانات كبيرة دون حد 5MB الخاص بـ localStorage. */
-      if (financeDB) {
-        idbReplaceAllEmployees(employeesData).catch(err => console.error('خطأ في حفظ سجل الموظفين:', err));
-      } else {
-        try { localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData)); }
-        catch (err) { console.warn('تعذر حفظ سجل الموظفين محلياً:', err); }
+      try {
+        localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData || []));
+      } catch (err) {
+        console.warn('تعذر حفظ النسخة المحلية لسجل الموظفين:', err);
       }
+
+      if (financeDB) {
+        idbReplaceAllEmployees(employeesData || [])
+          .catch(err => console.error('خطأ في حفظ سجل الموظفين في IndexedDB:', err));
+      }
+
       updateDashboardCalculations();
     }
 
     async function saveSingleEmployeeToStorage(emp) {
+      /* الحفظ المحلي أولاً وبشكل فوري، ثم IndexedDB إن كان متاحاً. */
+      try {
+        localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData || []));
+      } catch (err) {
+        console.warn('تعذر حفظ النسخة المحلية لسجل الموظفين:', err);
+      }
+
       if (financeDB) {
         await idbPutEmployee(emp);
-      } else {
-        try { localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData)); }
-        catch (err) { console.warn('تعذر حفظ سجل الموظفين محلياً:', err); }
       }
     }
-    function handleLogin(e) {
-      e.preventDefault();
-      const user = document.getElementById('loginUserSelect').value;
-      const pass = document.getElementById('loginPass').value;
-      if (usersConfig[user] && pass !== usersConfig[user].password) {
-        alert('كلمة المرور غير صحيحة.');
+    function populateLoginUsers(){
+      const select=document.getElementById('loginUserSelect');
+      if(!select)return;
+      const current=select.value;
+      const users=Object.keys(usersConfig||{});
+      if(!users.length){
+        select.innerHTML='<option value="">لا يوجد مستخدمون</option>';
         return;
       }
-      currentUser = user;
-      document.getElementById('headerUserName').textContent = user;
-      document.getElementById('login-page').style.display = 'none';
-      document.getElementById('dashboard-layout').style.display = 'block';
-      document.getElementById('profileUserName').value = user;
-      document.getElementById('profileUserTitle').value = usersConfig[user]?.title || '';
+      select.innerHTML=users.map(name=>`<option value="${escapeHtml(name)}">${escapeHtml(name)}${usersConfig[name]?.title?` (${escapeHtml(usersConfig[name].title)})`:''}</option>`).join('');
+      if(users.includes(current))select.value=current;
     }
 
-    function handleLogout() {
-      if (confirm('هل ترغب بتسجيل الخروج؟')) {
-        currentUser = null;
-        document.getElementById('login-page').style.display = 'flex';
-        document.getElementById('dashboard-layout').style.display = 'none';
-      }
+    function renderUserManagementTable(){
+      const tbody=document.getElementById('userManagerTableBody');
+      if(!tbody)return;
+      const users=Object.entries(usersConfig||{});
+      if(!users.length){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:18px;font-weight:800;">لا توجد مستخدمون مسجلون.</td></tr>';return;}
+      tbody.innerHTML=users.map(([name,u])=>`
+        <tr>
+          <td><strong>${escapeHtml(name)}</strong>${name===currentUser?' <span style="font-size:.75rem;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:12px;font-weight:800;">الحالي</span>':''}</td>
+          <td>${escapeHtml(u?.title||'--')}</td>
+          <td style="letter-spacing:2px;">••••••••</td>
+          <td>
+            <button class="btn btn-secondary" style="padding:5px 9px;font-size:.8rem;" onclick="editUserManagerUser('${encodeURIComponent(name)}')"><i class="fa-solid fa-pen"></i> تعديل</button>
+            <button class="btn btn-danger" style="padding:5px 9px;font-size:.8rem;margin-right:5px;" onclick="deleteUserManagerUser('${encodeURIComponent(name)}')"><i class="fa-solid fa-trash"></i> حذف</button>
+          </td>
+        </tr>`).join('');
     }
+
+    function openUserManagerForm(name=''){
+      const form=document.getElementById('userManagerForm');
+      if(!form)return;
+      document.getElementById('userManagerOriginalName').value=name;
+      document.getElementById('userManagerName').value=name;
+      document.getElementById('userManagerPassword').value='';
+      document.getElementById('userManagerTitle').value=usersConfig[name]?.title||'';
+      document.getElementById('userManagerFormTitle').innerHTML=name?'<i class="fa-solid fa-user-pen"></i> تعديل المستخدم':'<i class="fa-solid fa-user-plus"></i> إضافة مستخدم جديد';
+      document.getElementById('userManagerPassword').placeholder=name?'اتركها فارغة إذا لن تغيّر كلمة السر':'كلمة السر الخاصة بالمستخدم';
+      form.style.display='block';
+      document.getElementById('userManagerName').focus();
+    }
+    function closeUserManagerForm(){
+      const form=document.getElementById('userManagerForm');
+      if(form)form.style.display='none';
+      ['userManagerOriginalName','userManagerName','userManagerPassword','userManagerTitle'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    }
+    async function saveUserManagerUser(){
+      const original=document.getElementById('userManagerOriginalName').value.trim();
+      const name=document.getElementById('userManagerName').value.trim();
+      const pass=document.getElementById('userManagerPassword').value;
+      const title=document.getElementById('userManagerTitle').value.trim();
+      if(!name){alert('يرجى كتابة اسم المستخدم.');return;}
+      if(!original && !pass){alert('يرجى كتابة كلمة سر للمستخدم الجديد.');return;}
+      if(pass && pass.length<4){alert('كلمة سر المستخدم يجب ألا تقل عن 4 أحرف أو أرقام.');return;}
+      if(name!==original && usersConfig[name]){alert('اسم المستخدم موجود مسبقاً. اختر اسماً آخر.');return;}
+      try{
+        let userObj=original?Object.assign({},usersConfig[original]||{}):{};
+        userObj.title=title;
+        if(pass)userObj.passwordHash=await sha256Hex(pass);
+        if(!original){
+          userObj.passwordHash=userObj.passwordHash||await sha256Hex(pass);
+          usersConfig[name]=userObj;
+        }else{
+          if(name!==original)delete usersConfig[original];
+          usersConfig[name]=userObj;
+        }
+        saveJsonStorage(STORAGE_USERS_KEY,usersConfig);
+        if(currentUser===original && name!==original)currentUser=name;
+        populateLoginUsers();
+        renderUserManagementTable();
+        if(currentUser===name){
+          document.getElementById('headerUserName').textContent=name;
+          if(document.getElementById('profileUserName'))document.getElementById('profileUserName').value=name;
+          if(document.getElementById('profileUserTitle'))document.getElementById('profileUserTitle').value=title;
+        }
+        closeUserManagerForm();
+        logOperation(original?'تعديل مستخدم':'إضافة مستخدم',`المستخدم: ${name}`,currentUser||'غير مسجل');
+        alert(original?'تم تعديل المستخدم وحفظ البيانات بنجاح.':'تمت إضافة المستخدم وحفظ كلمة السر الخاصة به بنجاح.');
+      }catch(err){alert('تعذر حفظ المستخدم.\n\n'+(err?.message||err));}
+    }
+    function editUserManagerUser(encodedName){
+      try{openUserManagerForm(decodeURIComponent(encodedName));}catch(e){}
+    }
+    function deleteUserManagerUser(encodedName){
+      const name=decodeURIComponent(encodedName);
+      if(!usersConfig[name])return;
+      const names=Object.keys(usersConfig);
+      if(names.length<=1){alert('لا يمكن حذف آخر مستخدم في المنظومة.');return;}
+      if(name===currentUser){alert('لا يمكن حذف المستخدم المسجل دخوله حالياً. سجل خروجك أولاً ثم احذف المستخدم.');return;}
+      if(!confirm(`هل أنت متأكد من حذف المستخدم:\n${name}\n\nسيتم حذف حسابه وكلمة سره من هذه المنظومة.`))return;
+      delete usersConfig[name];
+      saveJsonStorage(STORAGE_USERS_KEY,usersConfig);
+      populateLoginUsers();
+      renderUserManagementTable();
+      logOperation('حذف مستخدم',`المستخدم: ${name}`,currentUser||'غير مسجل');
+      alert('تم حذف المستخدم بنجاح.');
+    }
+
+    async function handleLogin(e){
+      e.preventDefault(); const user=document.getElementById('loginUserSelect').value; const pass=document.getElementById('loginPass').value; if(!user){alert('لا يوجد مستخدمون للدخول.');return;} if(!pass){alert('يرجى كتابة كلمة المرور.');return;}
+      try{
+        const selectedUser=usersConfig[user]||{};
+        let expectedHash=selectedUser.passwordHash||getAuthState()?.hash||null;
+        if(!expectedHash){
+          const p1=prompt('لم يتم تعيين كلمة مرور لهذا المستخدم بعد.\n\nأعد كتابة كلمة المرور التي أدخلتها لإنشائها:');
+          if(p1===null)return;
+          if(p1!==pass){alert('كلمتا المرور غير متطابقتين.');return;}
+          expectedHash=await sha256Hex(pass);
+          selectedUser.passwordHash=expectedHash;
+          usersConfig[user]=selectedUser;
+          saveJsonStorage(STORAGE_USERS_KEY,usersConfig);
+        }
+        if(await sha256Hex(pass)!==expectedHash){alert('كلمة المرور غير صحيحة.');logOperation('فشل تسجيل الدخول',`المستخدم المختار: ${user}`,user);return;}
+        currentUser=user; protectedAccessGranted=false; document.getElementById('headerUserName').textContent=user; document.getElementById('login-page').style.display='none'; document.getElementById('dashboard-layout').style.display='block'; document.getElementById('profileUserName').value=user; document.getElementById('profileUserTitle').value=usersConfig[user]?.title||''; document.getElementById('loginPass').value=''; renderUserManagementTable(); logOperation('تسجيل الدخول','تم تسجيل الدخول بنجاح.',user);
+      }catch(err){alert('تعذر تسجيل الدخول.\n\n'+(err?.message||err));}
+    }
+    function handleLogout(){ if(confirm('هل ترغب بتسجيل الخروج؟')){logOperation('تسجيل الخروج','تم تسجيل الخروج.');currentUser=null;protectedAccessGranted=false;document.getElementById('loginPass').value='';document.getElementById('login-page').style.display='flex';document.getElementById('dashboard-layout').style.display='none';} }
 
     /* تصفير كامل وآمن للبيانات المحلية — محمي بكلمة مرور وتأكيديْن.
        لا يحذف ملف HTML أو الكود؛ يحذف فقط البيانات المخزنة في IndexedDB/localStorage. */
@@ -2753,6 +3116,7 @@
       if (!finalConfirm) return;
 
       try {
+        logOperation('تصفير المنظومة بالكامل','بدأ تنفيذ التصفير الكامل.',currentUser||'غير مسجل');
         /* حذف قاعدة IndexedDB بالكامل لضمان عدم بقاء أي سجل موظف أو شهر. */
         if (financeDB) {
           try { financeDB.close(); } catch (e) {}
@@ -2772,7 +3136,10 @@
           STORAGE_SIG_KEY,
           STORAGE_USERS_KEY,
           STORAGE_FONT_KEY,
-          STORAGE_LPTRIO_KEY
+          STORAGE_LPTRIO_KEY,
+          STORAGE_AUTH_KEY,
+          STORAGE_OPERATION_LOG_KEY,
+          STORAGE_CERT_LOG_KEY
         ].forEach(key => {
           try { localStorage.removeItem(key); } catch (e) { console.warn('تعذر حذف المفتاح:', key, e); }
         });
@@ -2798,24 +3165,8 @@
       }
     }
 
-    function switchNav(secId) {
-      document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-      const target = document.getElementById(`section-${secId}`);
-      if (target) target.classList.add('active');
-
-      const navLink = Array.from(document.querySelectorAll('.nav-item')).find(n => n.getAttribute('onclick')?.includes(secId));
-      if (navLink) navLink.classList.add('active');
-
-      if (secId === 'allowance') {
-        renderAllowanceList();
-        loadAllowMgrEmp();
-      }
-
-      if (window.innerWidth <= 768) {
-        document.getElementById('sidebar').classList.remove('open-mobile');
-      }
+    function switchNav(secId){
+      if(PROTECTED_SECTIONS.has(secId)&&!requireProtectedAccess())return; document.querySelectorAll('.app-section').forEach(x=>x.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); const target=document.getElementById(`section-${secId}`); if(target)target.classList.add('active'); const link=Array.from(document.querySelectorAll('.nav-item')).find(x=>x.getAttribute('onclick')?.includes(`'${secId}'`)); if(link)link.classList.add('active'); if(secId==='allowance'){renderAllowanceList();loadAllowMgrEmp();} if(secId==='annual-salary')renderAnnualSalaryReport(); if(secId==='user-management')renderUserManagementTable(); if(secId==='operation-logs')renderOperationLogs(); if(secId==='certificate-log')renderCertificateLogs(); if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open-mobile');
     }
 
     /* مزامنة فورية لحقل "إلى" بين النموذج وشاشة المعاينة الحية */
@@ -3067,8 +3418,12 @@
       document.getElementById('lpTableOther3').textContent = sal.otherAllowance3 > 0 ? sal.otherAllowance3.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3}) : '0';
       document.getElementById('lpTableGross').textContent = sal.grossSalary.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
 
-      document.getElementById('lpPrintRaiseMonth').textContent = sal.allowanceMonth || 0;
-      document.getElementById('lpPrintRaiseYear').textContent = sal.allowanceYear || 0;
+      /* الزيادة السنوية القادمة: نفس شهر العلاوة المسجل للموظف، في السنة التالية.
+         مثال: شهر العلاوة يناير 2026 ← الزيادة القادمة يناير 2027. */
+      const raiseMonth = parseInt(sal.allowanceMonth, 10) || getEmpAllowanceMonth(emp) || 0;
+      const raiseBaseYear = parseInt(sal.allowanceYear, 10) || getEmpAllowanceYear(emp) || parseInt(year, 10) || new Date().getFullYear();
+      document.getElementById('lpPrintRaiseMonth').textContent = raiseMonth || 0;
+      document.getElementById('lpPrintRaiseYear').textContent = raiseMonth ? (raiseBaseYear + 1) : 0;
       document.getElementById('lpPrintLeaveDate').textContent = sal.lastPaymentDate || '30/06/2026';
       document.getElementById('lpPrintLeaveDays').textContent = '0';
       document.getElementById('lpPrintPensionBalance').textContent = '0';
@@ -3192,10 +3547,20 @@
       }
     }
 
+    function populateAnnualEmployeeSelect(){ const s=document.getElementById('annualEmpSelect'); if(!s)return; const cur=s.value; s.innerHTML='<option value="">-- اختر الموظف --</option>'+employeesData.map(e=>`<option value="${e.id}">${escapeHtml(e.name||'')} (${escapeHtml(e.financialNo||'')})</option>`).join(''); if(cur)s.value=cur; }
+    function renderAnnualSalaryReport(){ const emp=employeesData.find(e=>e.id===document.getElementById('annualEmpSelect')?.value),year=Number(document.getElementById('annualYearSelect')?.value)||2026,inline=document.getElementById('annualSalaryInlineSummary');if(!inline)return;if(!emp){annualBranchEmpId=null;const br=document.getElementById('annualBranchInput');if(br)br.value='';inline.innerHTML='<div style="padding:18px;text-align:center;border:1px dashed var(--border-color);border-radius:10px;font-weight:800;color:var(--text-muted);">اختر موظفاً لعرض كشف السنة.</div>';return;}const br=document.getElementById('annualBranchInput');if(br&&annualBranchEmpId!==emp.id){br.value=emp.branch||'';annualBranchEmpId=emp.id;} const rows=[];let tb=0,tg=0,tn=0,filled=0;for(let m=1;m<=12;m++){const rec=emp.monthlyData?.[`${year}-${m}`];if(rec){const b=Number(rec.basicSalary)||0,g=Number(rec.grossSalary)||0,n=Number(rec.netSalary)||0;tb+=b;tg+=g;tn+=n;filled++;rows.push({m,grade:rec.grade??emp.grade??'--',allow:rec.allowanceCount??0,basic:b,gross:g,net:n});}else rows.push({m,grade:'--',allow:'--',basic:null,gross:null,net:null});}const fmt=v=>v==null?'--':Number(v).toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3});inline.innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"><div style="padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;"><b>${escapeHtml(emp.name||'')}</b></div><div style="padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;">الأشهر المسجلة: <b>${filled}/12</b></div><div style="padding:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;">صافي السنة: <b>${fmt(tn)} د.ل</b></div></div><div class="table-container"><table class="data-table"><thead><tr><th>الشهر</th><th>الدرجة</th><th>العلاوات</th><th>الأساسي</th><th>الإجمالي</th><th>الصافي</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${EXCEL_IMPORT_MONTH_NAMES[r.m]}</td><td>${r.grade}</td><td>${r.allow}</td><td>${fmt(r.basic)}</td><td>${fmt(r.gross)}</td><td>${fmt(r.net)}</td></tr>`).join('')}</tbody><tfoot><tr style="font-weight:900;background:#f1f5f9;"><td colspan="3">إجمالي السنة</td><td>${fmt(tb)}</td><td>${fmt(tg)}</td><td>${fmt(tn)}</td></tr></tfoot></table></div>`;fillAnnualPrintSheet(emp,year,rows,tb,tg,tn); }
+    function changeAnnualDocFont(fontFamily){const sheet=document.getElementById('annual-salary-sheet');if(!sheet)return;sheet.style.setProperty('font-family',fontFamily,'important');sheet.querySelectorAll('*').forEach(el=>el.style.setProperty('font-family',fontFamily,'important'));const c=document.getElementById('modalAnnualFont');if(c)c.value=fontFamily;renderAnnualSignatureBlock();}
+    function changeAnnualDocFontSize(fontSize){const table=document.getElementById('annualSalaryPrintTable');if(table)table.style.setProperty('font-size',fontSize,'important');const c=document.getElementById('modalAnnualFontSize');if(c)c.value=fontSize;}
+    function changeAnnualTableRowHeight(mode){const table=document.getElementById('annualSalaryPrintTable');if(!table)return;let pad='5px 8px';if(mode==='compact')pad='3px 6px';if(mode==='spacious')pad='7px 10px';table.querySelectorAll('td,th').forEach(cell=>cell.style.setProperty('padding',pad,'important'));const c=document.getElementById('modalAnnualRowHeight');if(c)c.value=mode;}
+    function renderAnnualSignatureBlock(){const container=document.getElementById('annualSignatureContainer');if(!container)return;const count=document.getElementById('annualSignatoryCount')?.value||'2';const selected=document.getElementById('annualSignatorySelect')?.value||'sig2';const pos=document.getElementById('annualSignatoryPos')?.value||'left';const order=document.getElementById('annualSignatoryOrder')?.value||'name_first';if(count==='2'){container.style.justifyContent='space-between';container.innerHTML=buildSigBlock(signatoriesConfig.sig2.name,signatoriesConfig.sig2.title,order)+buildSigBlock(signatoriesConfig.sig1.name,signatoriesConfig.sig1.title,order);}else{const officer=selected==='sig1'?signatoriesConfig.sig1:signatoriesConfig.sig2;if(pos==='left')container.style.justifyContent='flex-end';else if(pos==='center')container.style.justifyContent='center';else container.style.justifyContent='flex-start';container.innerHTML=buildSigBlock(officer.name,officer.title,order);}}
+    function fillAnnualPrintSheet(emp,year,rows,tb,tg,tn){ const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};const d=new Date();const branchInput=document.getElementById('annualBranchInput');const destinationInput=document.getElementById('annualDestination');const branch=(branchInput?.value||emp.branch||'').trim();const destination=(destinationInput?.value||'').trim()||'--';set('annualPrintDate',`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`);set('annualPrintYear',year);set('annualPrintFinNo',emp.financialNo||'--');set('annualPrintNatNo',emp.nationalNo||'--');set('annualPrintEmpName',emp.name||'--');set('annualPrintBank',emp.bank||'--');set('annualPrintBranch',branch||'--');set('annualPrintAccount',emp.accountNo||'--');set('annualPrintDestination',destination);const b=document.getElementById('annualSalaryTableBody');if(!b)return;const fmt=v=>v==null?'--':Number(v).toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3});b.innerHTML=rows.map(r=>`<tr><td>${EXCEL_IMPORT_MONTH_NAMES[r.m]}</td><td>${r.grade}</td><td>${r.allow}</td><td>${fmt(r.basic)}</td><td>${fmt(r.gross)}</td><td>${fmt(r.net)}</td></tr>`).join('');set('annualTotalBasic',fmt(tb));set('annualTotalGross',fmt(tg));set('annualTotalNet',fmt(tn));renderAnnualSignatureBlock();try{document.getElementById('annualLogoImg').src=localStorage.getItem(STORAGE_LOGO_KEY)||DEFAULT_LOGO;}catch(e){} }
+    function openAnnualSalaryReport(){const id=document.getElementById('annualEmpSelect')?.value;if(!id){alert('الرجاء اختيار الموظف أولاً.');return;}document.getElementById('annualModalEmp').innerHTML=document.getElementById('annualEmpSelect').innerHTML;document.getElementById('annualModalEmp').value=id;document.getElementById('annualModalYear').value=document.getElementById('annualYearSelect').value;renderAnnualSalaryReport();changeAnnualDocFont(document.getElementById('modalAnnualFont')?.value||"'Cairo', sans-serif");changeAnnualDocFontSize(document.getElementById('modalAnnualFontSize')?.value||'13.5px');changeAnnualTableRowHeight(document.getElementById('modalAnnualRowHeight')?.value||'normal');renderAnnualSignatureBlock();document.getElementById('annual-salary-modal').style.display='flex';logOperation('فتح كشف مرتب سنوي',`عرض كشف السنة ${document.getElementById('annualYearSelect').value}.`);} function closeAnnualSalaryModal(){document.getElementById('annual-salary-modal').style.display='none';}
+
     function executeDirectPrint(type) {
       let sheetId = 'lastpay-cert-sheet';
       if (type === 'salary') sheetId = 'salary-cert-sheet';
       else if (type === 'allowance') sheetId = 'allowance-sheet';
+      else if (type === 'annual') sheetId = 'annual-salary-sheet';
 
       const sheetEl = document.getElementById(sheetId);
       if (!sheetEl) return;
@@ -3205,6 +3570,8 @@
 
       /* الكشوفات فقط تُطبع على عدة صفحات، أما الشهادات فتبقى بنفس سلوكها السابق تماماً */
       const multi = (type === 'allowance');
+      if(type==='salary'||type==='lastpay') logCertificateIssued(type);
+      else if(type==='annual') logOperation('طباعة كشف مرتب سنوي',`تم طباعة كشف السنة ${document.getElementById('annualYearSelect')?.value||''}.`);
 
       /* اتجاه الورقة الأفقي يُحقن مؤقتاً للكشوفات فقط ثم يُزال،
          حتى لا يتأثر اتجاه طباعة الشهادتين إطلاقاً */
@@ -3280,6 +3647,7 @@
       lastPayTrio.s3.title = g('lpSigTitle3').trim() || 'مراقب التربية و التعليم';
 
       try { localStorage.setItem(STORAGE_LPTRIO_KEY, JSON.stringify(lastPayTrio)); } catch(e){}
+      logOperation('تحديث توقيعات الدفع الأخير','تم حفظ أسماء وصفات التوقيعات.');
 
       if (document.getElementById('lastPaySignatureContainer')) renderLastPaySignatureBlock();
       if (showAlert === true) alert('تم حفظ أسماء وصفات الموقّعين الثلاثة بنجاح!');
@@ -3288,6 +3656,7 @@
     function resetLastPayTrio() {
       lastPayTrio = JSON.parse(JSON.stringify(LP_TRIO_DEFAULT));
       try { localStorage.removeItem(STORAGE_LPTRIO_KEY); } catch(e){}
+      logOperation('إعادة توقيعات الدفع الأخير للوضع الافتراضي','تمت استعادة توقيعات الدفع الأخير الافتراضية.');
       fillLastPayTrioInputs();
       if (document.getElementById('lastPaySignatureContainer')) renderLastPaySignatureBlock();
       alert('تمت استعادة بيانات الموقّعين الافتراضية.');
@@ -3449,6 +3818,7 @@
       saveEmployeesToStorage();
       renderAllowanceList();
       updateLastPayCertSheet();
+      logOperation('تحديث بيانات العلاوة السنوية', `${emp.name || ''} — شهر ${emp.allowanceMonth || 0} سنة ${emp.allowanceYear || 0}`);
       alert('تم تحديث بيانات العلاوة السنوية للموظف: ' + emp.name);
     }
 
@@ -3492,28 +3862,12 @@
       updateSalaryCertSheet();
       updateLastPayCertSheet();
       renderAllowanceSignatures();
+      logOperation('تحديث التوقيعات الرسمية','تم حفظ أسماء وصفات المسؤولين.');
       alert('تم حفظ بيانات المسؤولين والتوقيعات بنجاح!');
     }
 
-    function saveProfile() {
-      if (!currentUser) return;
-      const title = document.getElementById('profileUserTitle').value.trim();
-      const pass = document.getElementById('profileNewPass').value;
-
-      if (!usersConfig[currentUser]) usersConfig[currentUser] = {};
-      if (title) usersConfig[currentUser].title = title;
-      if (pass) usersConfig[currentUser].password = pass;
-
-      if (signatoriesConfig.sig1.name === currentUser && title) signatoriesConfig.sig1.title = title;
-      if (signatoriesConfig.sig2.name === currentUser && title) signatoriesConfig.sig2.title = title;
-
-      try {
-        localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(usersConfig));
-        localStorage.setItem(STORAGE_SIG_KEY, JSON.stringify(signatoriesConfig));
-      } catch(e){}
-      updateSalaryCertSheet();
-      updateLastPayCertSheet();
-      alert('تم تحديث الملف الشخصي بنجاح!');
+    async function saveProfile(){
+      if(!currentUser)return; const title=document.getElementById('profileUserTitle').value.trim(); const pass=document.getElementById('profileNewPass').value; if(!usersConfig[currentUser])usersConfig[currentUser]={}; if(title)usersConfig[currentUser].title=title; if(signatoriesConfig.sig1.name===currentUser&&title)signatoriesConfig.sig1.title=title; if(signatoriesConfig.sig2.name===currentUser&&title)signatoriesConfig.sig2.title=title; try{stripUserPasswords();saveJsonStorage(STORAGE_USERS_KEY,usersConfig);saveJsonStorage(STORAGE_SIG_KEY,signatoriesConfig); if(pass){if(pass.length<4){alert('كلمة المرور الجديدة يجب ألا تقل عن 4 أحرف أو أرقام.');return;} const newHash=await sha256Hex(pass); saveJsonStorage(STORAGE_AUTH_KEY,{scheme:'SHA-256',hash:newHash,setAt:new Date().toISOString()}); if(currentUser&&usersConfig[currentUser]){usersConfig[currentUser].passwordHash=newHash; saveJsonStorage(STORAGE_USERS_KEY,usersConfig);} document.getElementById('profileNewPass').value='';populateLoginUsers();logOperation('تغيير كلمة مرور الدخول','تم تغيير كلمة المرور الخاصة بالمستخدم وحفظها كـ Hash محلي.');} updateSalaryCertSheet();updateLastPayCertSheet();logOperation('تحديث الملف الشخصي','تم حفظ بيانات الحساب والصفة الرسمية.');alert('تم تحديث الملف الشخصي بنجاح!');}catch(err){alert('تعذر حفظ الملف الشخصي.\n\n'+(err?.message||err));}
     }
 
     /* =====================================================================
@@ -3583,6 +3937,8 @@
         saveEmployeesToStorage();
         try{empCurrentPage=1;renderEmployeesTable();populateEmployeeSelects();renderAllowanceList();updateDashboardCalculations();onCertMonthYearChange();updateSalaryCertSheet();updateLastPayCertSheet();}catch(uiErr){console.error('خطأ في تحديث الواجهة بعد حذف الفترة:',uiErr);}
         closeDeleteMonthlyPeriodModal();
+        logOperation('حذف شهر مالي',`تم حذف ${count} سجل للفترة ${label} فقط.`);
+        renderAnnualSalaryReport();
         alert(`تم حذف السجلات المالية للفترة ${label} فقط بنجاح.\n\nلم يتم حذف أي موظف أو رقم وطني أو رقم مالي، ولم تتأثر بقية الأشهر.`);
       }catch(err){console.error(err);alert('تعذر حذف الفترة المحددة ولم يتم إكمال العملية.\n\n'+(err?.message||err));}
     }
@@ -3647,7 +4003,8 @@
           if(conflicts.length)throw new Error('تم إيقاف الاستيراد بالكامل لحماية البيانات. توجد تعارضات في هوية موظفين داخل الملف:\n\n'+conflicts.slice(0,8).join('\n')+(conflicts.length>8?`\n... ويوجد ${conflicts.length-8} تعارضات أخرى.`:''));
           if(!importedRows)throw new Error('لم يتم العثور على صفوف موظفين صالحة للاستيراد. لم يتم تغيير أي بيانات.');
           employeesData=workingEmployees; repairEmployeesData(); saveEmployeesToStorage();
-          try{empCurrentPage=1;renderEmployeesTable();populateEmployeeSelects();renderAllowanceList();updateDashboardCalculations();onCertMonthYearChange();updateSalaryCertSheet();updateLastPayCertSheet();}catch(uiErr){console.error('خطأ في تحديث الواجهة بعد الاستيراد:',uiErr);}
+          logOperation('استيراد ملف Excel',`تم استيراد ${importedRows} سجل مالي إلى ${EXCEL_IMPORT_MONTH_NAMES[period.month]} ${period.year} من الورقة الأولى فقط. الموظفون الجدد: ${newEmployees}. السجلات المستبدلة: ${replacedRows}.`);
+          try{empCurrentPage=1;renderEmployeesTable();populateEmployeeSelects();populateAnnualEmployeeSelect();renderAnnualSalaryReport();renderAllowanceList();updateDashboardCalculations();onCertMonthYearChange();updateSalaryCertSheet();updateLastPayCertSheet();}catch(uiErr){console.error('خطأ في تحديث الواجهة بعد الاستيراد:',uiErr);}
           alert(`تم استيراد ${importedRows.toLocaleString('en-US')} سجل مالي إلى ${EXCEL_IMPORT_MONTH_NAMES[period.month]} ${period.year} بنجاح.\n\nالموظفون الجدد: ${newEmployees.toLocaleString('en-US')}\nالسجلات المستبدلة لنفس الشهر: ${replacedRows.toLocaleString('en-US')}\nالصفوف غير المكتملة التي تم تجاهلها: ${skippedRows.toLocaleString('en-US')}\n\nتم الحفاظ على هوية الموظف ومنع تكرار الرقم المالي أو الرقم الوطني.`);
         }catch(error){console.error(error);alert('تم إيقاف الاستيراد دون حفظ التغييرات لحماية البيانات.\n\n'+(error?.message||error));}
         finally{pendingExcelImportPeriod=null;if(e.target)e.target.value='';updateExcelImportPeriodStatus();}
@@ -3831,6 +4188,10 @@
       };
     }
 
+    function getFullBackupPayload(){ stripUserPasswords(); return {format:'SULUQ-FINANCE-BACKUP',version:2,exportedAt:new Date().toISOString(),employees:JSON.parse(JSON.stringify(employeesData||[])),signatories:JSON.parse(JSON.stringify(signatoriesConfig||{})),users:JSON.parse(JSON.stringify(usersConfig||{})),auth:safeParseLocalStorage(STORAGE_AUTH_KEY,null),logo:localStorage.getItem(STORAGE_LOGO_KEY)||null,font:localStorage.getItem(STORAGE_FONT_KEY)||null,lastPayTrio:JSON.parse(JSON.stringify(lastPayTrio||{})),operationLogs:JSON.parse(JSON.stringify(operationLogs||[])),certificateLogs:JSON.parse(JSON.stringify(certificateLogs||[]))}; }
+    function exportFullBackup(){ try{ const blob=new Blob([JSON.stringify(getFullBackupPayload())],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a'); a.href=url;a.download=`نسخة_احتياطية_مالية_سلوق_${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);logOperation('تصدير نسخة احتياطية',`تم تصدير ${employeesData.length} موظفاً مع الإعدادات والسجلات.`);alert('تم تصدير النسخة الاحتياطية بنجاح.'); }catch(err){alert('تعذر تصدير النسخة الاحتياطية.\n\n'+(err?.message||err));} }
+    async function importFullBackup(e){ const file=e.target.files?.[0];if(!file)return; try{ const payload=JSON.parse(await file.text()); if(payload?.format!=='SULUQ-FINANCE-BACKUP'||!Array.isArray(payload.employees))throw new Error('ملف النسخة الاحتياطية غير صالح.'); if(!confirm('تحذير!\n\nسيتم استبدال البيانات الحالية بالكامل ببيانات النسخة الاحتياطية.\n\nهل تريد المتابعة؟'))return; const clone=JSON.parse(JSON.stringify(payload.employees)),fin=new Map(),nat=new Map(); for(const emp of clone){const f=normalizeIdentityValue(emp.financialNo),n=normalizeIdentityValue(emp.nationalNo);if(!f||!n)throw new Error('النسخة تحتوي موظفاً بدون رقم مالي أو وطني.');if(fin.has(f)&&fin.get(f)!==n)throw new Error(`تعارض الرقم المالي ${f} داخل النسخة.`);if(nat.has(n)&&nat.get(n)!==f)throw new Error(`تعارض الرقم الوطني ${n} داخل النسخة.`);fin.set(f,n);nat.set(n,f);emp.monthlyData=(emp.monthlyData&&typeof emp.monthlyData==='object')?emp.monthlyData:{};} employeesData=clone;repairEmployeesData();if(financeDB)await idbReplaceAllEmployees(employeesData);else saveJsonStorage(STORAGE_EMP_KEY,employeesData); if(payload.signatories)signatoriesConfig=Object.assign(signatoriesConfig,payload.signatories);if(payload.users)usersConfig=Object.assign(usersConfig,payload.users);stripUserPasswords();saveJsonStorage(STORAGE_USERS_KEY,usersConfig);if(payload.auth?.hash)saveJsonStorage(STORAGE_AUTH_KEY,payload.auth);if(payload.logo)saveJsonStorage(STORAGE_LOGO_KEY,payload.logo);else localStorage.removeItem(STORAGE_LOGO_KEY);if(payload.font)saveJsonStorage(STORAGE_FONT_KEY,payload.font);else localStorage.removeItem(STORAGE_FONT_KEY);if(payload.lastPayTrio)lastPayTrio=Object.assign(JSON.parse(JSON.stringify(LP_TRIO_DEFAULT)),payload.lastPayTrio);operationLogs=Array.isArray(payload.operationLogs)?payload.operationLogs:[];certificateLogs=Array.isArray(payload.certificateLogs)?payload.certificateLogs:[];saveJsonStorage(STORAGE_OPERATION_LOG_KEY,operationLogs);saveJsonStorage(STORAGE_CERT_LOG_KEY,certificateLogs);loadLastPayTrio();loadSavedLogo();loadSavedFont();populateEmployeeSelects();populateAnnualEmployeeSelect();renderEmployeesTable();renderAnnualSalaryReport();renderAllowanceList();updateDashboardCalculations();onCertMonthYearChange();updateSalaryCertSheet();updateLastPayCertSheet();logOperation('استيراد نسخة احتياطية',`تم استعادة ${employeesData.length} موظفاً وسجلات النسخة.`);alert('تم استيراد النسخة الاحتياطية بنجاح.'); }catch(err){alert('تم رفض النسخة الاحتياطية ولم تتغير البيانات الحالية إن كان الخطأ قبل الحفظ.\n\n'+(err?.message||err));} finally{if(e.target)e.target.value='';} }
+
     function exportToExcel() {
       const rows = employeesData.map(e => ({
         'الرقم المالي': e.financialNo,
@@ -3850,6 +4211,7 @@
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'سجل المرتبات');
       XLSX.writeFile(wb, 'مرتبات_تعليم_سلوق_2026.xlsx');
+      logOperation('تصدير Excel',`تم تصدير سجل ${employeesData.length} موظفاً.`);
     }
 
     function renderEmployeesTable() {
@@ -4124,8 +4486,10 @@
       }
       renderEmployeesTable();
       populateEmployeeSelects();
+      populateAnnualEmployeeSelect();
       renderAllowanceList();
       updateDashboardCalculations();
+      logOperation(oldEmp ? 'تعديل موظف' : 'إضافة موظف', `${employeePayload.name || ''} — الرقم المالي ${employeePayload.financialNo || ''}`);
       closeAddEmpModal();
       alert(oldEmp ? 'تم تعديل بيانات الموظف وحفظها بنجاح.' : 'تمت إضافة الموظف وحفظه بنجاح.');
     }
@@ -4139,8 +4503,10 @@
         if (financeDB) await idbDeleteEmployee(empId);
         else localStorage.setItem(STORAGE_EMP_KEY, JSON.stringify(employeesData.filter(e => e.id !== empId)));
         employeesData = employeesData.filter(e => e.id !== empId);
+        logOperation('حذف موظف', `${emp.name || ''} — الرقم المالي ${emp.financialNo || ''}`);
         renderEmployeesTable();
         populateEmployeeSelects();
+        populateAnnualEmployeeSelect();
         renderAllowanceList();
         updateDashboardCalculations();
         alert('تم حذف الموظف بنجاح.');
